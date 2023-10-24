@@ -1,7 +1,11 @@
 import './App.css';
 import Graph from "react-graph-vis";
 import React, { useState } from "react";
-//const { appendFile } = require('fs');
+
+import * as d3 from 'd3';
+import 'd3-graphviz';
+
+
 var arch;
 
 const DEFAULT_PARAMS = {
@@ -13,7 +17,7 @@ const DEFAULT_PARAMS = {
   "presence_penalty": 0
 }
 
-const SELECTED_PROMPT = "STATELESS"
+const SELECTED_PROMPT = "RDF"
 
 var options = {
   layout: {
@@ -28,15 +32,63 @@ var options = {
 };
 
 //----------------------------------------------------------------------------------------------------------
+//Funciones para guardar en archivos
 
-const guardarArchivoDeTexto = (parseado, nombre) => {
-  const a = document.createElement("a");
-  const archivo = new Blob([parseado], { type: 'text/plain' });
-  const url = URL.createObjectURL(archivo);
-  a.href = url;
-  a.download = nombre;
-  a.click();
-  URL.revokeObjectURL(url);
+function guardarRDF(respuesta, id){
+  console.log('respuesta: ',respuesta);
+  console.log('id: ',id);
+
+  let data = {
+    id: id,
+    respuesta: respuesta
+  };
+
+  let dataAEnviar = JSON.stringify(data);
+  const serverUrl = 'http://localhost:5000/guardarRDF'; // Cambia la URL según la ubicación de tu servidor Node.js
+
+  const options = {// Opciones para la solicitud POST
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: dataAEnviar, 
+  };
+
+  // Realiza la solicitud POST al servidor Node.js
+  fetch(serverUrl, options)
+    .then(response => response.json()) // Maneja la respuesta del servidor
+    .then(result => {
+      console.log(result); // Haz algo con la respuesta del servidor, si es necesario
+    })
+    .catch(error => {
+      console.error('Error:', error); // Maneja errores de la solicitud
+  });
+}
+
+// Función para convertir RDF en DOT
+function rdfToDot(rdf) {
+  const lines = rdf.split('\n').map(line => line.trim());
+  const dotStatements = [];
+
+  for (const line of lines) {
+    if (line.startsWith('@prefix')) {
+      continue; // Ignorar declaraciones de prefijo
+    }
+
+    if (line.trim() === '.') {
+      continue; // Ignorar delimitadores de declaración RDF
+    }
+
+    // Dividir la línea en sujeto y predicado
+    const [subject, predicate] = line.split(/\s+/);
+
+    // Ignorar líneas que no tienen un sujeto o predicado válido
+    if (subject && predicate) {
+      dotStatements.push(`"${subject}" -> "${predicate}"`);
+    }
+  }
+
+  return `digraph G {\n  ${dotStatements.join('\n  ')}\n}`;
 }
 
 function guardarInfo(respuesta, state, id){
@@ -63,9 +115,49 @@ function guardarInfo(respuesta, state, id){
 
   let nombre = `${arch}`;
 
-  guardarArchivoDeTexto(parseado,nombre);
+  //guardarArchivoDeTexto(parseado,nombre);
+  guardarEnRDF(rta,id);
 
   console.log('parseado: ',parseado);
+}
+
+function guardarEnRDF(rta,id){
+
+  rta.forEach(function(res){
+    let data;
+    if(res.length === 3){
+
+      data = {
+        id: id,
+        entity1: res[0],
+        relation: res[1],
+        entity2: res[2]
+      }
+      let dataAEnviar = JSON.stringify(data);
+
+      //si es una response de tipo entuty->relation->entity, lo guardo en RDF
+      const serverUrl = 'http://localhost:5000/guardarRDF'; // Cambia la URL según la ubicación de tu servidor Node.js
+
+      // Opciones para la solicitud POST
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: dataAEnviar, // Convierte los datos a JSON y los envía en el cuerpo de la solicitud
+      };
+
+      // Realiza la solicitud POST al servidor Node.js
+      fetch(serverUrl, options)
+        .then(response => response.json()) // Maneja la respuesta del servidor
+        .then(result => {
+          console.log(result); // Haz algo con la respuesta del servidor, si es necesario
+        })
+        .catch(error => {
+          console.error('Error:', error); // Maneja errores de la solicitud
+      });
+    }
+  });
 }
 
 //---------------------------------------------------------------------------------------------------------
@@ -162,7 +254,7 @@ function App() {
         // update the color of the node
         node.color = color;
 
-      } else if (update.length === 2 && update[0] == "DELETE") {
+      } else if (update.length === 2 && update[0] === "DELETE") {
         // delete the node at the given index
         const [_, index] = update;
 
@@ -215,6 +307,7 @@ function App() {
             return response.json();
           })
           .then((response) => {
+            console.log("response: ",response);
             const { choices } = response;
             const text = choices[0].text;
             console.log("Esto es lo primero que devuelve la api: ",text);
@@ -296,12 +389,68 @@ function App() {
       })
   };
 
+  const queryRDF = (prompt, apiKey) => {
+    fetch('prompts/rdf.prompt')
+      .then(response => response.text())
+      .then(text => text.replace("$prompt", prompt))
+      .then(prompt => {
+        console.log("Esta es la prompt que escribi: ",prompt)
+
+        const params = { ...DEFAULT_PARAMS, prompt: prompt, stop: "end"};
+
+        const requestOptions = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + String(apiKey)
+          },
+          body: JSON.stringify(params)
+        };
+        fetch('https://api.openai.com/v1/completions', requestOptions)
+          .then(response => {
+            if (!response.ok) {
+              switch (response.status) {
+                case 401: // 401: Unauthorized: API key is wrong
+                  throw new Error('Please double-check your API key.');
+                case 429: // 429: Too Many Requests: Need to pay
+                  throw new Error('You exceeded your current quota, please check your plan and billing details.');
+                default:
+                  throw new Error('Something went wrong with the request, please check the Network log');
+              }
+            }
+            return response.json();
+          })
+          .then((response) => {
+            console.log("response: ",response);
+            const { choices } = response;
+            let text = choices[0].text;
+
+            guardarRDF(text,response.id);
+
+            let dot = rdfToDot(text);
+            console.log("asi queda luego de la funcion: ",dot);
+            d3.select("#graph")
+              .graphviz()
+                .renderDot(dot);
+
+            document.getElementsByClassName("searchBar")[0].value = "";
+            document.body.style.cursor = 'default';
+            document.getElementsByClassName("generateButton")[0].disabled = false;
+          }).catch((error) => {
+            console.log(error);
+            alert(error);
+          });
+      })
+  };
+
   const queryPrompt = (prompt, apiKey) => {
     if (SELECTED_PROMPT === "STATELESS") {
       queryStatelessPrompt(prompt, apiKey);
     } else if (SELECTED_PROMPT === "STATEFUL") {
       queryStatefulPrompt(prompt, apiKey);
-    } else {
+    } else if(SELECTED_PROMPT === "RDF"){
+      queryRDF(prompt, apiKey);
+    }else {
       alert("Please select a prompt");
       document.body.style.cursor = 'default';
       document.getElementsByClassName("generateButton")[0].disabled = false;
@@ -318,7 +467,7 @@ function App() {
 
     queryPrompt(prompt, apiKey);
   }
-
+  //<Graph graph={graphState} options={options} style={{ height: "640px" }} />
   return (
     <div className='container'>
       <h1 className="headerText">GraphGPT 🔎</h1>
@@ -333,7 +482,7 @@ function App() {
         </div>
       </center>
       <div className='graphContainer'>
-        <Graph graph={graphState} options={options} style={{ height: "640px" }} />
+        <div id="graph" style={{height: "640px"}}></div>
       </div>
       <p className='footer'>Pro tip: don't take a screenshot! You can right-click and save the graph as a .png  📸</p>
     </div>

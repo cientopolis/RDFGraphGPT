@@ -1,0 +1,26 @@
+@prefix ex: <http://example.org/> .
+@prefix dbo: <http://dbpedia.org/ontology/> .
+@prefix dbr: <http://dbpedia.org/resource/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:penicillinDiscovery rdf:type ex:ScientificDiscovery ;
+    ex:discoveredBy dbr:Alexander_Fleming ;
+    ex:discoveryYear "1928"^^xsd:integer ;
+    ex:impactOnMedicine "revolutionized the field of medicine" .
+
+dbr:Alexander_Fleming rdf:type dbo:Scientist ;
+    dbo:nationality dbr:Scotland .
+
+ex:PenicilliumNotatum rdf:type ex:Mold .
+
+ex:MoldProducedSubstance rdf:type ex:BiologicalSubstance ;
+    ex:producedBy ex:PenicilliumNotatum ;
+    ex:killsBacteria ex:WideVarietyOfBacteria .
+
+ex:WideVarietyOfBacteria rdf:type ex:Bacterium .
+
+ex:ScientificDiscovery rdf:type rdf:Class .
+ex:Scientist rdf:type rdf:Class .
+ex:Mold rdf:type rdf:Class .
+ex:BiologicalSubstance rdf:type rdf:Class .
+ex:Bacterium rdf:type rdf:Class .
