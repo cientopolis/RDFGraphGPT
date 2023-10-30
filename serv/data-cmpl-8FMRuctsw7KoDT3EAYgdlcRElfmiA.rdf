@@ -17,10 +17,15 @@ ex:MoldProducedSubstance rdf:type ex:BiologicalSubstance ;
     ex:producedBy ex:PenicilliumNotatum ;
     ex:killsBacteria ex:WideVarietyOfBacteria .
 
+ex:DevelopmentOfAntibiotics rdf:type ex:ScientificDevelopment ;
+    ex:ledBy ex:Alexander_Fleming ;
+    ex:marksTurningPointInMedicine "significant turning point in the treatment of bacterial infections" .
+
 ex:WideVarietyOfBacteria rdf:type ex:Bacterium .
 
 ex:ScientificDiscovery rdf:type rdf:Class .
 ex:Scientist rdf:type rdf:Class .
 ex:Mold rdf:type rdf:Class .
 ex:BiologicalSubstance rdf:type rdf:Class .
+ex:ScientificDevelopment rdf:type rdf:Class .
 ex:Bacterium rdf:type rdf:Class .

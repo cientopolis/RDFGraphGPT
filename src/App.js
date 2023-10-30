@@ -63,13 +63,32 @@ function guardarRDF(respuesta, id){
     .catch(error => {
       console.error('Error:', error); // Maneja errores de la solicitud
   });
+
+  // const serverUrl2 = 'http://localhost:5000/graphToDot'; // Cambia la URL según la ubicación de tu servidor Node.js
+  // const options2 = {
+  //   method: 'GET',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   }
+  // };
+
+  // fetch(serverUrl2, options2)
+  // .then(response => response.json()) // Maneja la respuesta del servidor
+  // .then(result => {
+  //   console.log(result); // Haz algo con la respuesta del servidor, si es necesario
+  //   let dotFormat = result.message;
+  //   console.log("asi queda luego de la funcion: ",dotFormat);
+  //   d3.select("#graph")
+  //     .graphviz()
+  //     .renderDot(dotFormat);
+  // })
 }
 
 // Función para convertir RDF en DOT
 function rdfToDot(rdf) {
   const lines = rdf.split('\n').map(line => line.trim());
   const dotStatements = [];
-
+  let sub;
   for (const line of lines) {
     if (line.startsWith('@prefix')) {
       continue; // Ignorar declaraciones de prefijo
@@ -80,15 +99,31 @@ function rdfToDot(rdf) {
     }
 
     // Dividir la línea en sujeto y predicado
-    const [subject, predicate] = line.split(/\s+/);
-
+    let [subject, predicate, object] = line.split(/\s+/);
+    
+    if(object === ";" || object === "."){
+      object = predicate;
+      predicate = subject;
+      subject = sub;
+    }
+    else{
+      sub = subject;
+    }
+    const regex = /\^\^xsd:/;
+    if (regex.test(object)) {
+      object = object.split("^^xsd:")[0];
+    }
     // Ignorar líneas que no tienen un sujeto o predicado válido
-    if (subject && predicate) {
-      dotStatements.push(`"${subject}" -> "${predicate}"`);
+    if (subject && predicate && object) {
+      dotStatements.push(`"${subject}" -> "${object}" [label="${predicate}"]`);
     }
   }
-
-  return `digraph G {\n  ${dotStatements.join('\n  ')}\n}`;
+  let dotFormat = `digraph G {${dotStatements.join(' ')}}`;
+  const regex2 = /"{2}/g;
+  if(regex2.test(dotFormat)){
+    dotFormat = dotFormat.replace(/"{2}/g, '"');
+  }
+  return dotFormat;
 }
 
 function guardarInfo(respuesta, state, id){
@@ -427,11 +462,11 @@ function App() {
 
             guardarRDF(text,response.id);
 
-            let dot = rdfToDot(text);
-            console.log("asi queda luego de la funcion: ",dot);
+            let dotFormat = rdfToDot(text);
+            console.log("asi queda luego de la funcion: ",dotFormat);
             d3.select("#graph")
               .graphviz()
-                .renderDot(dot);
+              .renderDot(dotFormat);
 
             document.getElementsByClassName("searchBar")[0].value = "";
             document.body.style.cursor = 'default';
@@ -471,7 +506,7 @@ function App() {
   return (
     <div className='container'>
       <h1 className="headerText">GraphGPT 🔎</h1>
-      <p className='subheaderText'>Build complex, directed graphs to add structure to your ideas using natural language. Understand the relationships between people, systems, and maybe solve a mystery.</p>
+      <p className='subheaderText'>Parse natural language into rdf triples and build complex, directed graphs from that. Understand the relationships between people, systems, and maybe solve a mystery.</p>
       <p className='opensourceText'><a href="https://github.com/varunshenoy/graphgpt">GraphGPT is open-source</a>&nbsp;🎉</p>
       <center>
         <div className='inputContainer'>
@@ -482,7 +517,7 @@ function App() {
         </div>
       </center>
       <div className='graphContainer'>
-        <div id="graph" style={{height: "640px"}}></div>
+        <div id="graph" ></div>
       </div>
       <p className='footer'>Pro tip: don't take a screenshot! You can right-click and save the graph as a .png  📸</p>
     </div>
