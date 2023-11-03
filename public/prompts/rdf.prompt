@@ -1,4 +1,4 @@
-Create an RDF graph based on the following natural language input. Please represent the input as a knowledge graph in RDF turtle format. If necessary, clarify any ambiguous entities or relationships
+Create an RDF graph based on the following natural language input. Please represent the input as a knowledge graph in RDF turtle format. If necessary, clarify any ambiguous entities or relationships. When it is possible use a wikidata uri.
 
 When the response ends, please put the string "end", so i can know if i have all the information.
 

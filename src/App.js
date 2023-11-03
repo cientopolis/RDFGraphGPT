@@ -19,6 +19,8 @@ const DEFAULT_PARAMS = {
 
 const SELECTED_PROMPT = "RDF"
 
+let last_valid_id;
+
 var options = {
   layout: {
     hierarchical: true
@@ -34,14 +36,22 @@ var options = {
 //----------------------------------------------------------------------------------------------------------
 //Funciones para guardar en archivos
 
-function guardarRDF(respuesta, id){
-  console.log('respuesta: ',respuesta);
-  console.log('id: ',id);
+function guardarRDF(respuesta, id, dondeGuardar){
+  let data;
 
-  let data = {
-    id: id,
-    respuesta: respuesta
-  };
+  if(dondeGuardar === "DIFFERENT"){
+    last_valid_id = id;
+    data = {
+      id: id,
+      respuesta: respuesta
+    };
+  }
+  else{
+    data ={
+      id: last_valid_id,
+      respuesta: respuesta
+    }
+  }
 
   let dataAEnviar = JSON.stringify(data);
   const serverUrl = 'http://localhost:5000/guardarRDF'; // Cambia la URL según la ubicación de tu servidor Node.js
@@ -460,7 +470,8 @@ function App() {
             const { choices } = response;
             let text = choices[0].text;
 
-            guardarRDF(text,response.id);
+            let valor = document.getElementsByClassName("select")[0].value;
+            guardarRDF(text,response.id,valor);
 
             let dotFormat = rdfToDot(text);
             console.log("asi queda luego de la funcion: ",dotFormat);
@@ -499,15 +510,23 @@ function App() {
     document.getElementsByClassName("generateButton")[0].disabled = true;
     const prompt = document.getElementsByClassName("searchBar")[0].value;
     const apiKey = document.getElementsByClassName("apiKeyTextField")[0].value;
-
     queryPrompt(prompt, apiKey);
   }
   //<Graph graph={graphState} options={options} style={{ height: "640px" }} />
   return (
     <div className='container'>
-      <h1 className="headerText">GraphGPT 🔎</h1>
+      <h1 className="headerText">RDFGraphGPT 🔎</h1>
       <p className='subheaderText'>Parse natural language into rdf triples and build complex, directed graphs from that. Understand the relationships between people, systems, and maybe solve a mystery.</p>
       <p className='opensourceText'><a href="https://github.com/varunshenoy/graphgpt">GraphGPT is open-source</a>&nbsp;🎉</p>
+      <p className="subheaderText">Where do you want to save your rdf?</p>
+      <br></br>
+      <div  className="select-container" >
+        <select  className="select">
+          <option value="SAME">Same archive</option>
+          <option value="DIFFERENT">New archive</option>
+        </select>
+      </div>
+
       <center>
         <div className='inputContainer'>
           <input className="searchBar" placeholder="Describe your graph..."></input>

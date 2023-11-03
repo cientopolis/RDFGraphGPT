@@ -52,7 +52,7 @@ function guardarRDF(id,graph){
     // Guarda los datos en un archivo llamado "data-{id de la consulta}.rdf"
     let archivo = "data-" + id + ".rdf";
 
-    fs.writeFile(archivo, graph, (err) => {
+    fs.appendFile(archivo, graph, (err) => {
         if (err) {
             console.error(err);
         } else {
@@ -69,31 +69,3 @@ function graphToDot(){
     console.log(dotString);
     return dotString;
 }
-
-// function guardarRDF(id,entity1,relation,entity2){
-//     const store = $rdf.graph();
-
-//     // Crea las entidades y la relacion
-//     const entity1RDF = $rdf.sym(`http://example.com/resource/${entity1}`);
-//     const entity2RDF = $rdf.sym(`http://example.com/resource/${entity2}`);
-//     const relationRDF = $rdf.sym(`http://example.com/ontology/${relation}`);
-
-//     // Añade las triples al modelo RDF
-//     store.add(entity1RDF, relationRDF, entity2RDF);
-
-//     // Guarda los datos en un archivo
-//     const rdfString = $rdf.serialize(undefined, store, entity1RDF.uri, 'text/turtle');
-//     //const serialazedData = serializer.serialize(graph);
-
-//     // Guarda los datos en un archivo llamado "data-{id de la consulta}.rdf"
-//     let archivo = "data-" + id + ".rdf";
-
-//     fs.writeFile(archivo, rdfString, (err) => {
-//         if (err) {
-//             console.error(err);
-//         } else {
-//             console.log("Los datos se guardaron correctamente");
-//         }
-//     });
-    
-// }
