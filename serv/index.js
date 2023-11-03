@@ -24,6 +24,20 @@ app.get('/graphToDot', async(req, res) => {
     }
 });
 
+app.get('/readRDF', async(req, res) => {
+    const id = req.query.id;
+    const filename = `data-${id}.rdf`;
+    fs.readFile(filename, (err, data) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            console.log("Los datos se leyeron correctamente");
+            console.log(data.toString('utf8'));
+            res.status(200).json({ message: data.toString('utf8') });
+        }
+      });
+});
+
 app.post('/guardarRDF', async(req, res) => {
     //const { id, entity1, relation, entity2 } = req.body;
     const { id, respuesta }= req.body;

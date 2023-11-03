@@ -37,21 +37,18 @@ var options = {
 //Funciones para guardar en archivos
 
 function guardarRDF(respuesta, id, dondeGuardar){
-  let data;
 
   if(dondeGuardar === "DIFFERENT"){
     last_valid_id = id;
-    data = {
-      id: id,
-      respuesta: respuesta
-    };
   }
   else{
-    data ={
-      id: last_valid_id,
-      respuesta: respuesta
-    }
+    id = last_valid_id;
   }
+
+  let data = {
+    id: id,
+    respuesta: respuesta
+  };
 
   let dataAEnviar = JSON.stringify(data);
   const serverUrl = 'http://localhost:5000/guardarRDF'; // Cambia la URL según la ubicación de tu servidor Node.js
@@ -74,25 +71,25 @@ function guardarRDF(respuesta, id, dondeGuardar){
       console.error('Error:', error); // Maneja errores de la solicitud
   });
 
-  // const serverUrl2 = 'http://localhost:5000/graphToDot'; // Cambia la URL según la ubicación de tu servidor Node.js
-  // const options2 = {
-  //   method: 'GET',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   }
-  // };
+  //El codigo que sigue es para leer el contenido completo del archivo (para graficar todo si es que el archivo ya estaba escrito)
 
-  // fetch(serverUrl2, options2)
-  // .then(response => response.json()) // Maneja la respuesta del servidor
-  // .then(result => {
-  //   console.log(result); // Haz algo con la respuesta del servidor, si es necesario
-  //   let dotFormat = result.message;
-  //   console.log("asi queda luego de la funcion: ",dotFormat);
-  //   d3.select("#graph")
-  //     .graphviz()
-  //     .renderDot(dotFormat);
-  // })
+  const serverUrl2 = `http://localhost:5000/readRDF?id=${id}`; // Cambia la URL según la ubicación de tu servidor Node.js
+  const options2 = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  };
+
+  fetch(serverUrl2, options2)
+  .then(response => response.json()) // Maneja la respuesta del servidor
+  .then(result => {
+    console.log("res:", result); // Haz algo con la respuesta del servidor, si es necesario
+    let dotFormat = result.message;
+    console.log("asi queda luego de la funcion: ",dotFormat);
+  })
 }
+
 
 // Función para convertir RDF en DOT
 function rdfToDot(rdf) {
