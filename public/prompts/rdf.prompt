@@ -1,6 +1,6 @@
 Create an RDF graph based on the following natural language input. Please represent the input as a knowledge graph in RDF turtle format. If necessary, clarify any ambiguous entities or relationships. When it is possible use a wikidata uri.
 
-When the response ends, please put the string "end", so i can know if i have all the information.
+When the response ends, please put the string "eof", so i can know if i have all the information.
 
 Example:
 Input: 
@@ -37,7 +37,7 @@ ex:Mold rdf:type rdf:Class .
 ex:BiologicalSubstance rdf:type rdf:Class .
 ex:ScientificDevelopment rdf:type rdf:Class .
 ex:Bacterium rdf:type rdf:Class .
-end
+eof
 
 Input: $prompt
 Output:

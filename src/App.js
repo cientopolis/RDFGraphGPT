@@ -36,7 +36,7 @@ var options = {
 //----------------------------------------------------------------------------------------------------------
 //Funciones para guardar en archivos
 
-function guardarRDF(respuesta, id, dondeGuardar){
+async function guardarRDF(respuesta, id, dondeGuardar){
 
   if(dondeGuardar === "DIFFERENT"){
     last_valid_id = id;
@@ -81,12 +81,11 @@ function guardarRDF(respuesta, id, dondeGuardar){
     }
   };
 
-  fetch(serverUrl2, options2)
+  return fetch(serverUrl2, options2)
   .then(response => response.json()) // Maneja la respuesta del servidor
-  .then(result => {
-    console.log("res:", result); // Haz algo con la respuesta del servidor, si es necesario
-    let dotFormat = result.message;
-    console.log("asi queda luego de la funcion: ",dotFormat);
+  .then(result => {// Haz algo con la respuesta del servidor, si es necesario
+    let entireArch = result.message;
+    return entireArch;
   })
 }
 
@@ -438,7 +437,7 @@ function App() {
       .then(prompt => {
         console.log("Esta es la prompt que escribi: ",prompt)
 
-        const params = { ...DEFAULT_PARAMS, prompt: prompt, stop: "end"};
+        const params = { ...DEFAULT_PARAMS, prompt: prompt, stop: "eof"};
 
         const requestOptions = {
           method: 'POST',
@@ -462,16 +461,16 @@ function App() {
             }
             return response.json();
           })
-          .then((response) => {
+          .then(async(response) => {
             console.log("response: ",response);
             const { choices } = response;
             let text = choices[0].text;
 
             let valor = document.getElementsByClassName("select")[0].value;
-            guardarRDF(text,response.id,valor);
+            let nuevoArch = await guardarRDF(text,response.id,valor);
 
-            let dotFormat = rdfToDot(text);
-            console.log("asi queda luego de la funcion: ",dotFormat);
+            let dotFormat = rdfToDot(nuevoArch);
+
             d3.select("#graph")
               .graphviz()
               .renderDot(dotFormat);
@@ -519,8 +518,8 @@ function App() {
       <br></br>
       <div  className="select-container" >
         <select  className="select">
-          <option value="SAME">Same archive</option>
           <option value="DIFFERENT">New archive</option>
+          <option value="SAME">Same archive</option>
         </select>
       </div>
 
