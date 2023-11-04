@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 
 app.get('/readRDF', async(req, res) => {
     const id = req.query.id;
-    const filename = `data-${id}.rdf`;
+    const filename = `${id}.rdf`;
     fs.readFile(filename, (err, data) => {
         if (err) {
             res.status(500).send(err);
@@ -30,8 +30,6 @@ app.post('/guardarRDF', async(req, res) => {
     //const { id, entity1, relation, entity2 } = req.body;
     const { id, respuesta }= req.body;
     try{
-        //.replace(/\s+/g, ''); => para sacarle los espacios a los strings
-        //await guardarRDF(id,entity1.replace(/\s+/g, ''),relation.replace(/\s+/g, ''),entity2.replace(/\s+/g, ''));
         await guardarRDF(id,respuesta);
 
         res.status(200).json({ message: '¡Guardado!' });
@@ -42,6 +40,18 @@ app.post('/guardarRDF', async(req, res) => {
     }
 });
 
+app.get('/archNames', async(req, res) => {
+    const folderPath = '/home/juana/Documentos/lifia/graphGPT/repoGPT/serv'; // Reemplaza con la ruta de tu carpeta
+
+    fs.readdir(folderPath, (err, files) => {
+        if (err) {
+            console.error('Error al leer la carpeta:', err);
+        }
+        console.log("Los nombres de los archivos se leyeron correctamente")
+        res.status(200).json({ message: files });
+    });
+});
+
 
 app.listen(port, () => {
   console.log(`Servidor Node.js escuchando en el puerto ${port}`);
@@ -49,10 +59,8 @@ app.listen(port, () => {
 
 function guardarRDF(id,graph){
     grafo = graph;
-    const store = $rdf.graph();
-
     // Guarda los datos en un archivo llamado "data-{id de la consulta}.rdf"
-    let archivo = "data-" + id + ".rdf";
+    let archivo = id + ".rdf";
 
     fs.appendFile(archivo, graph, (err) => {
         if (err) {

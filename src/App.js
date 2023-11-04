@@ -19,7 +19,8 @@ const DEFAULT_PARAMS = {
 
 const SELECTED_PROMPT = "RDF"
 
-let last_valid_id;
+let last_valid_name;
+let archNames=[];
 
 var options = {
   layout: {
@@ -36,17 +37,17 @@ var options = {
 //----------------------------------------------------------------------------------------------------------
 //Funciones para guardar en archivos
 
-async function guardarRDF(respuesta, id, dondeGuardar){
+async function guardarRDF(respuesta, id, dondeGuardar, archName){
 
   if(dondeGuardar === "DIFFERENT"){
-    last_valid_id = id;
+    last_valid_name = archName;
   }
   else{
-    id = last_valid_id;
+    archName = last_valid_name;
   }
 
   let data = {
-    id: id,
+    id: archName,
     respuesta: respuesta
   };
 
@@ -73,7 +74,7 @@ async function guardarRDF(respuesta, id, dondeGuardar){
 
   //El codigo que sigue es para leer el contenido completo del archivo (para graficar todo si es que el archivo ya estaba escrito)
 
-  const serverUrl2 = `http://localhost:5000/readRDF?id=${id}`; // Cambia la URL según la ubicación de tu servidor Node.js
+  const serverUrl2 = `http://localhost:5000/readRDF?id=${archName}`; // Cambia la URL según la ubicación de tu servidor Node.js
   const options2 = {
     method: 'GET',
     headers: {
@@ -87,6 +88,27 @@ async function guardarRDF(respuesta, id, dondeGuardar){
     let entireArch = result.message;
     return entireArch;
   })
+}
+
+async function readAllArchives(){
+  const url = 'http://localhost:5000/archNames'; // Cambia la URL según la ubicación de tu servidor Node.js
+
+  const options = {// Opciones para la solicitud POST
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    } 
+  };
+
+  archNames = await fetch(url, options)
+    .then(response => response.json()) // Maneja la respuesta del servidor
+    .then(result => { // Haz algo con la respuesta del servidor, si es necesario
+      return result.message;
+    })
+    .catch(error => {
+      console.error('Error:', error); // Maneja errores de la solicitud
+  });
+  return archNames.filter(arch => arch.endsWith(".rdf"));
 }
 
 
@@ -204,6 +226,8 @@ function guardarEnRDF(rta,id){
 //---------------------------------------------------------------------------------------------------------
 
 function App() {
+
+  readAllArchives();
 
   const [graphState, setGraphState] = useState(
     {
@@ -467,7 +491,12 @@ function App() {
             let text = choices[0].text;
 
             let valor = document.getElementsByClassName("select")[0].value;
-            let nuevoArch = await guardarRDF(text,response.id,valor);
+            let name = "";
+
+            if (valor === "DIFFERENT"){
+              name = document.getElementsByClassName("archName")[0].value;
+            }
+            let nuevoArch = await guardarRDF(text,response.id,valor,name);
 
             let dotFormat = rdfToDot(nuevoArch);
 
@@ -517,13 +546,19 @@ function App() {
       <p className="subheaderText">Where do you want to save your rdf?</p>
       <br></br>
       <div  className="select-container" >
-        <select  className="select">
-          <option value="DIFFERENT">New archive</option>
-          <option value="SAME">Same archive</option>
-        </select>
+        <div>
+          <select  className="select">
+            <option value="DIFFERENT">New archive</option>
+            <option value="SAME">Same archive</option>
+          </select>
+        </div>
+        
+        <div className="nameContainer">
+          <input className="archName" placeholder="Enter the name of the archive..."></input>
+        </div>
       </div>
-
-      <center>
+      
+      <center>  
         <div className='inputContainer'>
           <input className="searchBar" placeholder="Describe your graph..."></input>
           <input className="apiKeyTextField" type="password" placeholder="Enter your OpenAI API key..."></input>
