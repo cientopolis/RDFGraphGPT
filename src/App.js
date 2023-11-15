@@ -39,12 +39,12 @@ var options = {
 
 async function guardarRDF(respuesta, id, dondeGuardar, archName){
 
-  if(dondeGuardar === "DIFFERENT"){
-    last_valid_name = archName;
-  }
-  else{
-    archName = last_valid_name;
-  }
+  // if(dondeGuardar === "DIFFERENT"){
+  //   last_valid_name = archName;
+  // }
+  // else{
+  //   archName = last_valid_name;
+  // }
 
   let data = {
     id: archName,
@@ -100,7 +100,7 @@ async function readAllArchives(){
     } 
   };
 
-  archNames = await fetch(url, options)
+  let names = await fetch(url, options)
     .then(response => response.json()) // Maneja la respuesta del servidor
     .then(result => { // Haz algo con la respuesta del servidor, si es necesario
       return result.message;
@@ -108,7 +108,40 @@ async function readAllArchives(){
     .catch(error => {
       console.error('Error:', error); // Maneja errores de la solicitud
   });
-  return archNames.filter(arch => arch.endsWith(".rdf"));
+  archNames = names.filter(arch => arch.endsWith(".rdf"));
+
+  return archNames;
+}
+
+async function putNamesInSelect(){
+  let names = await readAllArchives();
+
+  const select = document.getElementById("nameArch");
+
+  if (select.options.length > 0){
+    select.innerHTML = "";
+  }
+
+  if(names.length === 0){
+    const optionElement = document.createElement('option');
+    optionElement.value = "No archives";
+    optionElement.text = "No archives";
+    select.add(optionElement);
+  }else{
+    names.forEach(name => {
+      const optionElement = document.createElement('option');
+      optionElement.value = name;
+      optionElement.text = name;
+      select.add(optionElement);
+    });
+    console.log("names: ",names);
+  }
+  
+}
+
+async function existeNombre(nombre){
+  let names = await readAllArchives();
+  return names.includes(nombre);
 }
 
 
@@ -227,7 +260,7 @@ function guardarEnRDF(rta,id){
 
 function App() {
 
-  readAllArchives();
+  putNamesInSelect();
 
   const [graphState, setGraphState] = useState(
     {
@@ -495,7 +528,25 @@ function App() {
 
             if (valor === "DIFFERENT"){
               name = document.getElementsByClassName("archName")[0].value;
+              if(name === ""){
+                alert("Please enter a name for the archive");
+                document.body.style.cursor = 'default';
+                document.getElementsByClassName("generateButton")[0].disabled = false;
+                return;
+              }
+              else if(await existeNombre(name+".rdf")){
+                alert("That archive name already exists, please enter another one");
+                document.body.style.cursor = 'default';
+                document.getElementsByClassName("generateButton")[0].disabled = false;
+                return;
+              }
+              putNamesInSelect();
             }
+            else{
+              name = document.getElementById("nameArch").value;
+              name = name.split(".")[0];
+            }
+
             let nuevoArch = await guardarRDF(text,response.id,valor,name);
 
             let dotFormat = rdfToDot(nuevoArch);
@@ -549,12 +600,16 @@ function App() {
         <div>
           <select  className="select">
             <option value="DIFFERENT">New archive</option>
-            <option value="SAME">Same archive</option>
+            <option value="SAME">Existent archive</option>
           </select>
         </div>
         
         <div className="nameContainer">
           <input className="archName" placeholder="Enter the name of the archive..."></input>
+        </div>
+        <div>
+          <select id="nameArch" className="selectdos">
+          </select>
         </div>
       </div>
       
