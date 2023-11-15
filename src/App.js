@@ -1,5 +1,5 @@
 import './App.css';
-import Graph from "react-graph-vis";
+// import Graph from "react-graph-vis";
 import React, { useState } from "react";
 
 import * as d3 from 'd3';
@@ -19,32 +19,13 @@ const DEFAULT_PARAMS = {
 
 const SELECTED_PROMPT = "RDF"
 
-let last_valid_name;
 let archNames=[];
 
-var options = {
-  layout: {
-    hierarchical: true
-  },
-  edges: {
-    color: "#34495e",
-    smooth: {
-      enabled: true,
-    }
-  }
-};
 
 //----------------------------------------------------------------------------------------------------------
 //Funciones para guardar en archivos
 
-async function guardarRDF(respuesta, id, dondeGuardar, archName){
-
-  // if(dondeGuardar === "DIFFERENT"){
-  //   last_valid_name = archName;
-  // }
-  // else{
-  //   archName = last_valid_name;
-  // }
+async function guardarRDF(respuesta, archName){
 
   let data = {
     id: archName,
@@ -108,8 +89,13 @@ async function readAllArchives(){
     .catch(error => {
       console.error('Error:', error); // Maneja errores de la solicitud
   });
-  archNames = names.filter(arch => arch.endsWith(".rdf"));
 
+  if(names.length === 0){
+    archNames = [];
+  }
+  else{
+    archNames = names.filter(arch => arch.endsWith(".rdf"));
+  }
   return archNames;
 }
 
@@ -134,14 +120,42 @@ async function putNamesInSelect(){
       optionElement.text = name;
       select.add(optionElement);
     });
-    console.log("names: ",names);
+  }
+  
+}
+
+async function putNamesInSelectFromNames(){
+
+  const select = document.getElementById("nameArch");
+
+  if (select.options.length > 0){
+    select.innerHTML = "";
+  }
+
+  if(archNames.length === 0){
+    const optionElement = document.createElement('option');
+    optionElement.value = "No archives";
+    optionElement.text = "No archives";
+    select.add(optionElement);
+  }else{
+    archNames.forEach(name => {
+      const optionElement = document.createElement('option');
+      optionElement.value = name;
+      optionElement.text = name;
+      select.add(optionElement);
+    });
   }
   
 }
 
 async function existeNombre(nombre){
   let names = await readAllArchives();
-  return names.includes(nombre);
+  if(names.length === 0){
+    return false;
+  }
+  else{
+    return names.includes(nombre);
+  }
 }
 
 
@@ -540,14 +554,15 @@ function App() {
                 document.getElementsByClassName("generateButton")[0].disabled = false;
                 return;
               }
-              putNamesInSelect();
+              archNames.push(name+".rdf");
+              await putNamesInSelectFromNames();
             }
             else{
               name = document.getElementById("nameArch").value;
               name = name.split(".")[0];
             }
 
-            let nuevoArch = await guardarRDF(text,response.id,valor,name);
+            let nuevoArch = await guardarRDF(text, name);
 
             let dotFormat = rdfToDot(nuevoArch);
 
@@ -566,17 +581,17 @@ function App() {
   };
 
   const queryPrompt = (prompt, apiKey) => {
-    if (SELECTED_PROMPT === "STATELESS") {
-      queryStatelessPrompt(prompt, apiKey);
-    } else if (SELECTED_PROMPT === "STATEFUL") {
-      queryStatefulPrompt(prompt, apiKey);
-    } else if(SELECTED_PROMPT === "RDF"){
-      queryRDF(prompt, apiKey);
-    }else {
-      alert("Please select a prompt");
-      document.body.style.cursor = 'default';
-      document.getElementsByClassName("generateButton")[0].disabled = false;
-    }
+    // if (SELECTED_PROMPT === "STATELESS") {
+    //   queryStatelessPrompt(prompt, apiKey);
+    // } else if (SELECTED_PROMPT === "STATEFUL") {
+    //   queryStatefulPrompt(prompt, apiKey);
+    // } else if(SELECTED_PROMPT === "RDF"){
+    queryRDF(prompt, apiKey);
+    // }else {
+    //   alert("Please select a prompt");
+    //   document.body.style.cursor = 'default';
+    //   document.getElementsByClassName("generateButton")[0].disabled = false;
+    // }
   }
 
 
@@ -588,7 +603,7 @@ function App() {
     const apiKey = document.getElementsByClassName("apiKeyTextField")[0].value;
     queryPrompt(prompt, apiKey);
   }
-  //<Graph graph={graphState} options={options} style={{ height: "640px" }} />
+
   return (
     <div className='container'>
       <h1 className="headerText">RDFGraphGPT 🔎</h1>
