@@ -84,7 +84,7 @@
   border-radius: 5px;
   box-shadow: 0 0 5px rgb(0 0 0 / 10%);
   display: block;
-  font-size: 16px;
+  font-size: 18px;
   height: 50px;
   outline: none;
   padding: 0 10px;
@@ -162,6 +162,8 @@
 }
 
 .select-container select {
+  border: 1px solid rgb(0, 0, 0);
+  border-radius: 5px;
   width: 100%;
   display: inline-block; /* Hace que el select se comporte como un elemento en línea */
   margin: 0 auto; /* Centra el select horizontalmente con márgenes automáticos */
@@ -170,5 +172,25 @@
 }
 
 .archName {
+  border: 1px solid rgb(0, 0, 0);
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgb(0 0 0 / 10%);
   width: 100%;
+}
+
+.segundoSelect {
+  width: 50%;
+  text-align: center; /* Centra el contenido horizontalmente */
+  align-items: center;
+  justify-content: center;
+}
+
+.segundoSelect select {
+  border: 1px solid rgb(0, 0, 0);
+  border-radius: 5px;
+  width: 100%;
+  display: inline-block; /* Hace que el select se comporte como un elemento en línea */
+  margin: 0 auto; /* Centra el select horizontalmente con márgenes automáticos */
+  font-family: 'Noticia Text';
+  font-size: 18px;
 }

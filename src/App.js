@@ -622,13 +622,15 @@ function App() {
         <div className="nameContainer">
           <input className="archName" placeholder="Enter the name of the archive..."></input>
         </div>
-        <div>
+      </div>
+      <br/>
+      
+      
+      <center> 
+        <div className="segundoSelect">
           <select id="nameArch" className="selectdos">
           </select>
-        </div>
-      </div>
-      
-      <center>  
+        </div> 
         <div className='inputContainer'>
           <input className="searchBar" placeholder="Describe your graph..."></input>
           <input className="apiKeyTextField" type="password" placeholder="Enter your OpenAI API key..."></input>
