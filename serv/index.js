@@ -27,7 +27,7 @@ app.get('/readRDF', async(req, res) => {
 });
 
 app.post('/guardarRDF', async(req, res) => {
-    //const { id, entity1, relation, entity2 } = req.body;
+    
     const { id, respuesta }= req.body;
     try{
         await guardarRDF(id,respuesta);
@@ -37,6 +37,20 @@ app.post('/guardarRDF', async(req, res) => {
         // En caso de error, maneja el error y responde con un mensaje de error
         console.error('Error al guardar RDF:', error);
         res.status(500).json({ message: 'Error al guardar RDF' });
+    }
+});
+
+app.post('/editarRDF', async(req, res) => {
+
+    const { id, respuesta }= req.body;
+    try{
+        await editarRDF(id,respuesta);
+
+        res.status(200).json({ message: '¡Editado!' });
+    }catch (error) {
+        // En caso de error, maneja el error y responde con un mensaje de error
+        console.error('Error al editar RDF:', error);
+        res.status(500).json({ message: 'Error al editar RDF' });
     }
 });
 
@@ -52,7 +66,6 @@ app.get('/archNames', async(req, res) => {
     });
 });
 
-
 app.listen(port, () => {
   console.log(`Servidor Node.js escuchando en el puerto ${port}`);
 });
@@ -67,6 +80,20 @@ function guardarRDF(id,graph){
             console.error(err);
         } else {
             console.log("Los datos se guardaron correctamente");
+        }
+    });    
+}
+
+function editarRDF(id,graph){
+    grafo = graph;
+    // Guarda los datos en un archivo llamado "{id de la consulta}.rdf"
+    let archivo = id + ".rdf";
+
+    fs.writeFile(archivo, graph, (err) => {
+        if (err) {
+            console.error(err);
+        } else {
+            console.log("Los datos se editaron correctamente");
         }
     });    
 }

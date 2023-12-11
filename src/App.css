@@ -194,3 +194,15 @@
   font-family: 'Noticia Text';
   font-size: 18px;
 }
+
+
+#seeRDF{
+  width: 100%;
+  overflow: auto;
+}
+
+#graph {
+  width: 900px;
+  height: 400px;
+  display: block;
+}

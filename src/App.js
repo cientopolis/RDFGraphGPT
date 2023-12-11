@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import * as d3 from 'd3';
 import 'd3-graphviz';
 
+import cytoscape from 'cytoscape';
 
 var arch;
 
@@ -25,6 +26,7 @@ let archNames=[];
 //----------------------------------------------------------------------------------------------------------
 //Funciones para guardar en archivos
 
+//guarda el rdf en el file system
 async function guardarRDF(respuesta, archName){
 
   let data = {
@@ -71,6 +73,39 @@ async function guardarRDF(respuesta, archName){
   })
 }
 
+//edita el rdf sobreescribiendo su contenido con uno nuevo
+async function editRDF(archName){
+  const rdfEditado = document.getElementsByClassName("rdfText")[0].value;
+  console.log("Esto es lo que se va a guardar: ",rdfEditado);
+
+  let data = {
+    id: archName,
+    respuesta: rdfEditado
+  };
+
+  let dataAEnviar = JSON.stringify(data);
+  const serverUrl = 'http://localhost:5000/editarRDF';
+
+  const options = {// Opciones para la solicitud POST
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: dataAEnviar, 
+  };
+
+  // Realiza la solicitud POST al servidor Node.js
+  fetch(serverUrl, options)
+    .then(response => response.json()) // Maneja la respuesta del servidor
+    .then(result => {
+      console.log(result); // Haz algo con la respuesta del servidor, si es necesario
+    })
+    .catch(error => {
+      console.error('Error:', error); // Maneja errores de la solicitud
+  });
+}
+
+//hace el fetch al servidor para leer todos los nombres de los archivos
 async function readAllArchives(){
   const url = 'http://localhost:5000/archNames'; // Cambia la URL según la ubicación de tu servidor Node.js
 
@@ -99,6 +134,7 @@ async function readAllArchives(){
   return archNames;
 }
 
+//Pone valor a las options del select a partir de leer los nombres de los archivos del file system
 async function putNamesInSelect(){
   let names = await readAllArchives();
 
@@ -124,6 +160,7 @@ async function putNamesInSelect(){
   
 }
 
+//Pone valor a las options del select a partir de los nombres en la variable archNames
 async function putNamesInSelectFromNames(){
 
   const select = document.getElementById("nameArch");
@@ -148,6 +185,7 @@ async function putNamesInSelectFromNames(){
   
 }
 
+//chequea que el nombre de archivo no exista
 async function existeNombre(nombre){
   let names = await readAllArchives();
   if(names.length === 0){
@@ -157,7 +195,6 @@ async function existeNombre(nombre){
     return names.includes(nombre);
   }
 }
-
 
 // Función para convertir RDF en DOT
 function rdfToDot(rdf) {
@@ -201,6 +238,98 @@ function rdfToDot(rdf) {
   return dotFormat;
 }
 
+function rdfToJSON(rdf) {
+  const lines = rdf.split('\n').map(line => line.trim());
+  let nodes = [];
+  let edges = [];
+  let sub;
+
+  for (const line of lines) {
+    if (line.startsWith('@prefix')) {
+      continue; // Ignorar declaraciones de prefijo
+    }
+
+    if (line.trim() === '.') {
+      continue; // Ignorar delimitadores de declaración RDF
+    }
+
+    // Dividir la línea en sujeto y predicado
+    let [subject, predicate, object] = line.split(/\s+/);
+    
+    if(object === ";" || object === "."){
+      object = predicate;
+      predicate = subject;
+      subject = sub;
+    }
+    else{
+      sub = subject;
+    }
+    const regex = /\^\^xsd:/;
+    if (regex.test(object)) {
+      object = object.split("^^xsd:")[0];
+    }
+
+    // Ignorar líneas que no tienen un sujeto o predicado válido
+    if (subject && predicate && object){
+      nodes.push({data : {id : `${subject}`}});
+      nodes.push({data : {id : `${object}`}});
+      edges.push({data : {id : `${predicate}`, source : `${subject}`, target : `${object}`}});
+    }
+  }
+
+  return {nodes : nodes, edges : edges};
+}
+
+async function seeTheRdf(){
+  let where = document.getElementsByClassName('select').value;
+  let name;
+  if(where === "DIFFERENT"){
+    name = document.getElementsByClassName("archName")[0].value;
+  }
+  else{
+    name = document.getElementById("nameArch").value;
+    name = name.split(".")[0];
+  }
+
+  const serverUrl = `http://localhost:5000/readRDF?id=${name}`; // Cambia la URL según la ubicación de tu servidor Node.js
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  };
+
+  await fetch(serverUrl, options)
+  .then(response => response.json()) // Maneja la respuesta del servidor
+  .then(result => {// Haz algo con la respuesta del servidor, si es necesario
+    let entireArch = result.message;
+    document.getElementById('resultado').innerHTML = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Editar RDF</title>
+      </head>
+      <body>
+          <h1>Edita tu RDF</h1>
+          <form>
+              <textarea style="width:100%" class="rdfText" rows="10" cols="30">${entireArch}</textarea>
+              <br>
+              <div style="float:right;width: 50%" >
+                <button class="clearButton" type="submit" style="float:right;">Guardar</button>
+              </div>
+          </form>
+      </body>
+      </html>
+  `;
+  });
+  const button = document.querySelector('#seeRDF');
+  button.style.display = 'none';
+}
+
+//----------------------------------------------------------------------------------------------------------
+//no usadas
 function guardarInfo(respuesta, state, id){
   console.log('estado: ',state);
 
@@ -501,14 +630,14 @@ function App() {
       })
   };
 
-  const queryRDF = (prompt, apiKey) => {
+  const queryRDF = (promp, apiKey) => {
     fetch('prompts/rdf.prompt')
       .then(response => response.text())
-      .then(text => text.replace("$prompt", prompt))
-      .then(prompt => {
-        console.log("Esta es la prompt que escribi: ",prompt)
+      .then(text => text.replace("$prompt", promp))
+      .then(promp => {
+        console.log("Esta es la prompt que escribi: ",promp)
 
-        const params = { ...DEFAULT_PARAMS, prompt: prompt, stop: "eof"};
+        const params = { ...DEFAULT_PARAMS, prompt: promp, stop: "eof"};
 
         const requestOptions = {
           method: 'POST',
@@ -533,7 +662,6 @@ function App() {
             return response.json();
           })
           .then(async(response) => {
-            console.log("response: ",response);
             const { choices } = response;
             let text = choices[0].text;
 
@@ -564,11 +692,75 @@ function App() {
 
             let nuevoArch = await guardarRDF(text, name);
 
-            let dotFormat = rdfToDot(nuevoArch);
+            const grafico = document.getElementsByClassName("grafico")[0].value;
+            console.log("grafico: ",grafico);
 
-            d3.select("#graph")
-              .graphviz()
-              .renderDot(dotFormat);
+            if(grafico === "graphviz"){
+              //--------------------Muestro grafo con graphviz--------------------
+              let dotFormat = rdfToDot(nuevoArch);
+              
+              d3.select("#graph")
+                .graphviz()
+                .renderDot(dotFormat);
+
+              //-------------------------------------------------------------------
+            }
+            else{
+              //--------------------Muestro grafo con cytoscape--------------------
+              let jsonFormat = rdfToJSON(nuevoArch);
+
+              const cy = cytoscape({
+                container: document.getElementById('graph'), // El contenedor donde se renderizará el grafo
+                elements: {
+                  nodes: jsonFormat.nodes,
+                  edges: jsonFormat.edges
+                },
+                style: [
+                  {
+                    selector: 'node',
+                    style: {
+                      'background-color': '#666',
+                      'label': 'data(id)'
+                    }
+                  },
+                  {
+                    selector: 'edge',
+                    style: {
+                      'width': 3,
+                      'line-color': '#ccc',
+                      'target-arrow-color': '#ccc',
+                      'target-arrow-shape': 'triangle',
+                      'label': 'data(id)'
+                    }
+                  }
+                ],
+                layout: {
+                  name: 'grid'
+                }
+              });
+              
+              // Habilita la edición de etiquetas de nodos y aristas
+              cy.nodes().on('dblclick', function (event) {
+                const node = event.target;
+                const newLabel = prompt('Ingrese el nuevo nombre para el nodo:', node.data('id'));
+                if (newLabel !== null) {
+                  node.data('id', newLabel);
+
+                  node.style({ 'label' : `${newLabel}` });
+                }
+              });
+              
+              cy.edges().on('dblclick', function (event) {
+                const edge = event.target;
+                const newLabel = prompt('Ingrese el nuevo nombre para la arista:', edge.data('id'));
+                if (newLabel !== null) {
+                  edge.data('id', newLabel);
+
+                  edge.style({ 'label' : `${newLabel}` });
+                }
+              });
+              //-------------------------------------------------------------------
+            }
 
             document.getElementsByClassName("searchBar")[0].value = "";
             document.body.style.cursor = 'default';
@@ -631,6 +823,14 @@ function App() {
           <select id="nameArch" className="selectdos">
           </select>
         </div> 
+        <br></br>
+        <div className="segundoSelect">
+          <select id="grafico" className="grafico">
+            <option value="graphviz">Graphviz</option>
+            <option value="cytoscape">Cytoscape</option>
+          </select>
+        </div> 
+
         <div className='inputContainer'>
           <input className="searchBar" placeholder="Describe your graph..."></input>
           <input className="apiKeyTextField" type="password" placeholder="Enter your OpenAI API key..."></input>
@@ -638,8 +838,15 @@ function App() {
           <button className="clearButton" onClick={clearState}>Clear</button>
         </div>
       </center>
+
       <div className='graphContainer'>
-        <div id="graph" ></div>
+        <div id="graph"></div>
+      </div>
+
+      <div id="resultado"></div>
+      <br></br>
+      <div id="containerSeeRDF">
+        <button className='generateButton' id='seeRDF' onClick={seeTheRdf}>See the rdf code</button>
       </div>
       <p className='footer'>Pro tip: don't take a screenshot! You can right-click and save the graph as a .png  📸</p>
     </div>
