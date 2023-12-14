@@ -199,6 +199,7 @@
 #seeRDF{
   width: 100%;
   overflow: auto;
+  display: none;
 }
 
 #graph {
