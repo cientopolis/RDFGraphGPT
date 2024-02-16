@@ -1,4 +1,4 @@
-I have the following RDF in turtle format, and i e¡want to improve it by adding some new IRIs. When the response ends, please put the string "eof", so i can know if i have all the information.
+I have the following RDF in turtle format, and i want to improve it by replacing some IRIs. I need you tu replace de IRIs with the number 1 before them with the IRIs with the number 2 before them. When the response ends, please put the string "eof", so i can know if i have all the information.
 
 Example:
 
@@ -37,7 +37,8 @@ ex:ScientificDevelopment rdf:type rdf:Class .
 ex:Bacterium rdf:type rdf:Class .
 
 IRIs: 
-@prefix ex: <http://better/example.org/> .
+1@prefix ex: <http://example.org/> .
+2@prefix ex: <http://better/example.org/> .
 
 Output:
 

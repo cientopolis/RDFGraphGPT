@@ -442,7 +442,7 @@ function App() {
 
         promp = promp.replace("$RDF", RDF);
 
-        const params = { ...DEFAULT_PARAMS, prompt: promp, stop: "eof"};
+        const params = { ...DEFAULT_PARAMS,model: "gpt-3.5-turbo-instruct", prompt: promp, stop: "eof"};
 
         const requestOptions = {
           method: 'POST',
@@ -488,7 +488,7 @@ function App() {
       .then(promp => {
         console.log("Esta es la prompt que escribi: ",promp)
 
-        const params = { ...DEFAULT_PARAMS, prompt: promp, stop: "eof"};
+        const params = { ...DEFAULT_PARAMS,model: "gpt-3.5-turbo-instruct",prompt: promp, stop: "eof"};
 
         const requestOptions = {
           method: 'POST',
