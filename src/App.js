@@ -247,6 +247,7 @@ function rdfToJSON(rdf) {
   const lines = rdf.split('\n').map(line => line.trim());
   let nodes = [];
   let edges = [];
+  let edgesRep = [];
   let sub;
 
   for (const line of lines) {
@@ -283,10 +284,20 @@ function rdfToJSON(rdf) {
     if (subject && predicate && object){
       nodes.push({data : {id : `${subject}`}});
       nodes.push({data : {id : `${object}`}});
-      edges.push({data : {id : `${predicate}`, source : `${subject}`, target : `${object}`}});
+      if(!edgesRep.some(edge => edge.id === `${predicate}`)){
+        edgesRep.push({id : `${predicate}`, cant : 1});
+        edges.push({data : {id : `${predicate}`, source : `${subject}`, target : `${object}`}});
+      }
+      else{
+        let ident = edgesRep.find(edge => edge.id === `${predicate}`).cant;
+        let index = edgesRep.findIndex(edge => edge.id === `${predicate}`);
+        edgesRep[index] = ({id : `${predicate}`, cant : ident + 1});
+        edges.push({data : {id : `${predicate}-${ident}`, source : `${subject}`, target : `${object}`, label : `${predicate}`}});
+      }
     }
   }
-
+  console.log("Nodos: ",nodes);
+  console.log("Aristas: ",edges);
   return {nodes : nodes, edges : edges};
 }
 
