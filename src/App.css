@@ -207,3 +207,21 @@
   height: 500px;
   display: block;
 }
+
+.mi-prompt {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+
+.mi-prompt textarea {
+  width: 100%;
+  resize: none;
+}

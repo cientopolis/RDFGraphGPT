@@ -427,7 +427,19 @@ function graphRDF(nuevoArch){
   });
 }
 
-//---------------------------------------------------------------------------------------------------------
+//---funciones para abrir y cerrar modal------------------------------------------------------------------------
+  
+function mostrarModal() {
+  const miModal = document.getElementById("miPrompt");
+  miModal.style.display = "block";
+}
+
+function cerrarModal() {
+  const miModal = document.getElementById("miPrompt");
+  miModal.style.display = "none";
+}
+
+//--------------------------------------------------------------------------------------------------------------
 
 function App() {
 
@@ -605,15 +617,17 @@ function App() {
   }
 
   const improveRDF = () => {
-    const nuevosIRIS = prompt("Ingrese los nuevos IRIs separados por coma");
-
+    //const nuevosIRIS = prompt("Ingrese los nuevos IRIs separados por coma");
+    let nuevosIRIS = document.getElementById("viejosIRIS").value;
+    nuevosIRIS = nuevosIRIS + document.getElementById("nuevosIRIS").value;
+    console.log("Estos son los nuevos IRIS: ",nuevosIRIS);
+    cerrarModal();
     document.body.style.cursor = 'wait';
     document.getElementsByClassName("generateButton")[0].disabled = true;
 
     const apiKey = document.getElementsByClassName("apiKeyTextField")[0].value;
     queryPrompt(nuevosIRIS, apiKey, "improve");
   }
-    
 
   return (
     <div className='container'>
@@ -667,11 +681,20 @@ function App() {
       <div id="resultado"></div>
       <br></br>
       <div id="containerSeeRDF">
-        <button className='generateButton' id='seeRDF' name="botonOculto" onClick={improveRDF}>Improve RDF</button>
+        <button className='generateButton' id='seeRDF' name="botonOculto" onClick={mostrarModal}>Improve RDF</button>
       </div>
       <br></br>
       <button className='generateButton' id='seeRDF' name="botonOculto" onClick={seeTheRdf}>See the rdf code</button>
       <p className='footer'>Pro tip: don't take a screenshot! You can right-click and save the graph as a .png  📸</p>
+
+      <div id="miPrompt" className="mi-prompt">
+        <label>Ingrese los IRIs que quiere modificar:</label>
+        <textarea id="viejosIRIS" rows="4" cols="50"></textarea>
+        <label>Ingrese los nuevos IRIs:</label>
+        <textarea id="nuevosIRIS" rows="4" cols="50"></textarea>
+        <button onClick={improveRDF} >Aceptar</button>
+      </div>
+
     </div>
   );
 }
