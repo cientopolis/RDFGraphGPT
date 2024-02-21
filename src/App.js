@@ -564,6 +564,21 @@ function App() {
       })
   };
 
+  const emptyPrompt = async () => {
+    let name;
+    name = document.getElementById("nameArch").value;
+    name = name.split(".")[0];
+
+    if(!existeNombre(name + ".rdf")){
+      alert("You have to select an existent archive in order to graph it");    
+    }
+    else{
+      let rdf = await readRDF(name);
+      console.log("Este es el rdf: ",rdf);
+      graphRDF(rdf);
+    }
+  }
+
   const queryPrompt = (prompt, apiKey, option) => {
     if(option === "normal"){
       queryRDF(prompt, apiKey);
@@ -580,7 +595,13 @@ function App() {
     document.getElementsByClassName("generateButton")[0].disabled = true;
     const prompt = document.getElementsByClassName("searchBar")[0].value;
     const apiKey = document.getElementsByClassName("apiKeyTextField")[0].value;
-    queryPrompt(prompt, apiKey, "normal");
+    if(prompt === ""){
+      console.log("No hay prompt");
+      emptyPrompt();
+    }
+    else{
+      queryPrompt(prompt, apiKey, "normal");
+    }
   }
 
   const improveRDF = () => {
@@ -632,8 +653,10 @@ function App() {
         <div className='inputContainer'>
           <input className="searchBar" placeholder="Describe your graph..."></input>
           <input className="apiKeyTextField" type="password" placeholder="Enter your OpenAI API key..."></input>
-          <button className="generateButton" onClick={createGraph}>Generate</button>
-          <button className="clearButton">Clear</button>
+          <div className="buttonsContainer">
+            <button className="generateButton" onClick={createGraph}>Generate</button>
+            <button className="clearButton">Clear</button>
+          </div>
         </div>
       </center>
 
