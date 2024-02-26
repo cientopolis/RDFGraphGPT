@@ -202,6 +202,12 @@
   display: none;
 }
 
+#improveRDF{
+  width: 100%;
+  overflow: auto;
+  display: none;
+}
+
 #graph {
   width: 900px;
   height: 500px;
@@ -224,4 +230,17 @@
 .mi-prompt textarea {
   width: 100%;
   resize: none;
+}
+
+#resultado {
+  display: none;
+}
+
+.closeRDF {
+  float: right;
+  width: 50%; 
+}
+
+.rdfText {
+  width: 100%;
 }

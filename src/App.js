@@ -319,31 +319,45 @@ async function seeTheRdf(){
       'Content-Type': 'application/json',
     }
   };
-
-  function closeResult() {
-    const resultadoElement = document.getElementById('resultado');
-    resultadoElement.style.display = 'none';
-  }
   
   await fetch(serverUrl, options)
   .then(response => response.json()) // Maneja la respuesta del servidor
   .then(result => {// Haz algo con la respuesta del servidor, si es necesario
     let entireArch = result.message;
-    document.getElementById('resultado').innerHTML = `
-    <body>
-        <h1>Edita tu RDF</h1>
-        <form>
-            <textarea style="width:100%" class="rdfText" rows="10" cols="30">${entireArch}</textarea>
-            <br>
-            <div style="float:right;width: 50%" >
-                <button class="clearButton" style="float:right;" onclick="closeResult()">Cerrar</button>
-            </div>
-        </form>
-    </body>
-    `;
+    let res = document.getElementById("resultado");
+    res.style.display = 'block';
+    res.querySelector('.rdfText').value = entireArch;
   });
   const button = document.querySelector('#seeRDF');
   button.style.display = 'none';
+}
+
+function buscarNombre(){
+  let name="";
+  let valor = document.getElementsByClassName("select")[0].value;
+
+  if (valor === "DIFFERENT"){
+    name = document.getElementsByClassName("archName")[0].value;
+  }
+  else{
+    name = document.getElementById("nameArch").value;
+    name = name.split(".")[0];
+  }
+  return name;
+}
+
+function closeResult() {
+  let nuevoRDF = document.getElementsByClassName("rdfText")[0].value;
+  const resultadoElement = document.getElementById("resultado");
+  resultadoElement.style.display = 'none';
+  const button = document.querySelector('#seeRDF');
+  button.style.display = 'block';
+
+  document.body.style.cursor = 'wait';
+  document.getElementsByClassName("generateButton")[0].disabled = true;
+  let arch = buscarNombre();
+  editRDF(arch, nuevoRDF);
+  graphRDF(nuevoRDF);
 }
 
 function graphRDF(nuevoArch){
@@ -450,16 +464,7 @@ function App() {
       .then(response => response.text())
       .then(text => text.replace("$IRIS", IRI))
       .then(async(promp) =>{
-        let name="";
-        let valor = document.getElementsByClassName("select")[0].value;
-
-        if (valor === "DIFFERENT"){
-          name = document.getElementsByClassName("archName")[0].value;
-        }
-        else{
-          name = document.getElementById("nameArch").value;
-          name = name.split(".")[0];
-        }
+        let name= buscarNombre();
 
         let RDF = await guardarRDF("", name);
 
@@ -494,8 +499,10 @@ function App() {
           let text = choices[0].text;
 
           let nuevoArch = await editRDF(name, text);
-
-          graphRDF(nuevoArch);
+          
+          document.body.style.cursor = 'default';
+          document.getElementsByClassName("generateButton")[0].disabled = false;
+          alert("The RDF was improved successfully");
         })
         .catch((error) => {
           console.log(error);
@@ -678,13 +685,22 @@ function App() {
         <div id="graph"></div>
       </div>
 
-      <div id="resultado"></div>
       <br></br>
       <div id="containerSeeRDF">
-        <button className='generateButton' id='seeRDF' name="botonOculto" onClick={mostrarModal}>Improve RDF</button>
+        <button className='generateButton' id='improveRDF' name="botonOculto" onClick={mostrarModal}>Improve RDF</button>
       </div>
       <br></br>
-      <button className='generateButton' id='seeRDF' name="botonOculto" onClick={seeTheRdf}>See the rdf code</button>
+
+      <div id="resultado" className="resultado">
+        <h1>Edita tu RDF</h1>
+          <textarea className="rdfText" rows="10" cols="30"></textarea>
+          <br></br>
+          <div>
+              <button className="closeRDF" onClick={closeResult} >Editar</button>
+          </div>
+      </div>
+
+      <button className='generateButton' id='seeRDF' name="botonOculto" onClick={seeTheRdf}>Edit the rdf code</button>
       <p className='footer'>Pro tip: don't take a screenshot! You can right-click and save the graph as a .png  📸</p>
 
       <div id="miPrompt" className="mi-prompt">
@@ -694,6 +710,8 @@ function App() {
         <textarea id="nuevosIRIS" rows="4" cols="50"></textarea>
         <button onClick={improveRDF} >Aceptar</button>
       </div>
+
+      
 
     </div>
   );
