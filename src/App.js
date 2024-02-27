@@ -286,7 +286,7 @@ function rdfToJSON(rdf) {
       nodes.push({data : {id : `${object}`}});
       if(!edgesRep.some(edge => edge.id === `${predicate}`)){
         edgesRep.push({id : `${predicate}`, cant : 1});
-        edges.push({data : {id : `${predicate}`, source : `${subject}`, target : `${object}`}});
+        edges.push({data : {id : `${predicate}`, source : `${subject}`, target : `${object}`, label : `${predicate}`}});
       }
       else{
         let ident = edgesRep.find(edge => edge.id === `${predicate}`).cant;
@@ -405,9 +405,11 @@ function graphRDF(nuevoArch){
           style: {
             'width': 3,
             'line-color': '#ccc',
-            'target-arrow-color': '#ccc',
             'target-arrow-shape': 'triangle',
-            'label': 'data(id)'
+            'target-arrow-color': '#FF0000',
+            'target-arrow-fill': 'filled',
+            'curve-style': 'bezier',
+            'label': 'data(label)'
           }
         }
       ],
@@ -460,6 +462,7 @@ function cerrarModal() {
   const miModal = document.getElementById("miPrompt");
   miModal.style.display = "none";
 }
+
 
 //--------------------------------------------------------------------------------------------------------------
 
@@ -717,7 +720,10 @@ function App() {
         <textarea id="viejosIRIS" rows="4" cols="50"></textarea>
         <label>Ingrese los nuevos IRIs:</label>
         <textarea id="nuevosIRIS" rows="4" cols="50"></textarea>
-        <button onClick={improveRDF} >Aceptar</button>
+        <div id="botonesImprove">
+          <button onClick={improveRDF} >Aceptar</button>
+          <button id="segundoboton" onClick={cerrarModal}>Cerrar</button>
+        </div>
       </div>
 
       

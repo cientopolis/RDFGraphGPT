@@ -244,3 +244,10 @@
 .rdfText {
   width: 100%;
 }
+
+#botonesImprove {
+  float: right;
+}
+#segundoboton {
+  margin-left: 20px;
+}
