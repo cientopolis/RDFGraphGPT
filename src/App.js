@@ -649,7 +649,7 @@ function App() {
 
   return (
     <div className='container'>
-      <h1 className="headerText">RDFGraphGPT 🔎</h1>
+      <h1 className="headerText">RDFGraphGPT 🕸️</h1>
       <p className='subheaderText'>Parse natural language into rdf triples and build complex, directed graphs from that. Understand the relationships between people, systems, and maybe solve a mystery.</p>
       <p className='opensourceText'><a href="https://github.com/varunshenoy/graphgpt">GraphGPT is open-source</a>&nbsp;🎉</p>
       <p className="subheaderText">Where do you want to save your rdf?</p>
