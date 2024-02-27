@@ -242,7 +242,7 @@ function rdfToDot(rdf) {
   }
   return dotFormat;
 }
-
+// Función para convertir RDF en JSON
 function rdfToJSON(rdf) {
   const lines = rdf.split('\n').map(line => line.trim());
   let nodes = [];
@@ -300,7 +300,7 @@ function rdfToJSON(rdf) {
   console.log("Aristas: ",edges);
   return {nodes : nodes, edges : edges};
 }
-
+//para ver el codigo rdf y poder editarlo
 async function seeTheRdf(){
   let where = document.getElementsByClassName('select').value;
   let name;
@@ -332,6 +332,7 @@ async function seeTheRdf(){
   button.style.display = 'none';
 }
 
+//busca el nombre del archivo actual
 function buscarNombre(){
   let name="";
   let valor = document.getElementsByClassName("select")[0].value;
@@ -345,21 +346,28 @@ function buscarNombre(){
   }
   return name;
 }
-
+//para cerrar el campo de edicion del codigo rdf
 function closeResult() {
-  let nuevoRDF = document.getElementsByClassName("rdfText")[0].value;
   const resultadoElement = document.getElementById("resultado");
   resultadoElement.style.display = 'none';
   const button = document.querySelector('#seeRDF');
   button.style.display = 'block';
-
+}
+//para editar el codigo del rdf manualmente
+function editResult(){
+  let nuevoRDF = document.getElementsByClassName("rdfText")[0].value;
+  closeResult();
   document.body.style.cursor = 'wait';
   document.getElementsByClassName("generateButton")[0].disabled = true;
   let arch = buscarNombre();
   editRDF(arch, nuevoRDF);
   graphRDF(nuevoRDF);
 }
-
+//para limpiar el contenido de la seccion del grafico
+function clearGraph(){
+  document.getElementById("graph").innerHTML = "";
+}
+//grafica el rdf dependiendo del graficador seleccionado
 function graphRDF(nuevoArch){
   const grafico = document.getElementsByClassName("grafico")[0].value;
   document.getElementById("graph").innerHTML = "";
@@ -676,7 +684,7 @@ function App() {
           <input className="apiKeyTextField" type="password" placeholder="Enter your OpenAI API key..."></input>
           <div className="buttonsContainer">
             <button className="generateButton" onClick={createGraph}>Generate</button>
-            <button className="clearButton">Clear</button>
+            <button className="clearButton" onClick={clearGraph}>Clear</button>
           </div>
         </div>
       </center>
@@ -696,7 +704,8 @@ function App() {
           <textarea className="rdfText" rows="10" cols="30"></textarea>
           <br></br>
           <div>
-              <button className="closeRDF" onClick={closeResult} >Editar</button>
+              <button className="closeRDF" onClick={editResult} >Editar</button>
+              <button className="closeRDF" onClick={closeResult} >Cerrar</button>
           </div>
       </div>
 
