@@ -1,42 +1,72 @@
-Create an RDF graph based on the following natural language input. Please represent the input as a knowledge graph in RDF turtle format. If necessary, clarify any ambiguous entities or relationships. When it is possible use a wikidata uri.
+Please represent the following natural language input as an RDF turtle format. 
+
+If necessary, clarify any ambiguous entities or relationships. 
+
+When it is possible use a wikidata iri. Please use all the tools that the turtle format allows, as the collections, classes and properties.
 
 When the response ends, please put the string "eof", so i can know if i have all the information.
 
 Example:
 Input: 
-"The discovery of penicillin by Alexander Fleming in 1928 revolutionized the field of medicine. Fleming, a Scottish bacteriologist, observed that a mold called Penicillium notatum produced a substance that killed a wide variety of bacteria. This breakthrough led to the development of antibiotics and marked a significant turning point in the treatment of bacterial infections."
+"The apartment block with address “146, 5th Avenue, New York, US”, has 24
+floors and 120 apartments. It was constructed in the year 1976. The second
+floor of the apartment block has 5 apartments: 201, 202, 203, 204 and 205.
+Apartment 201 is a one-bedroom apartment with two people living there:
+John Smith and his wife Mary Smith. Both John and Mary have been living
+in the apartment since October 12th , 2013. Before that, Simon Murphy lived
+in apartment 201 from December 1st , 2011 to October 12th , 2013. Next door
+to apartment 201, in apartment 202, lives Jim O’Brien and his son Harry
+O’Brien; Jim has been living there since May 12th , 2001 and Harry since
+June 5th , 2009. Apartment 202 has two bedrooms"
 
 Output:
 @prefix ex: <http://example.org/> .
-@prefix dbo: <http://dbpedia.org/ontology/> .
-@prefix dbr: <http://dbpedia.org/resource/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
-ex:penicillinDiscovery rdf:type ex:ScientificDiscovery ;
-    ex:discoveredBy dbr:Alexander_Fleming ;
-    ex:discoveryYear "1928"^^xsd:integer ;
-    ex:impactOnMedicine "revolutionized the field of medicine" .
+ex:ApartmentBlock rdf:type ex:Building ;
+    ex:hasAddress "146, 5th Avenue, New York, US" ;
+    ex:hasFloors "24"^^xsd:integer ;
+    ex:hasApartments "120"^^xsd:integer ;
+    ex:constructionYear "1976"^^xsd:integer .
 
-dbr:Alexander_Fleming rdf:type dbo:Scientist .
+ex:SecondFloor rdf:type ex:Floor ;
+    ex:belongsTo ex:ApartmentBlock ;
+    ex:hasApartments (ex:Apartment201 ex:Apartment202 ex:Apartment203 ex:Apartment204 ex:Apartment205) .
 
-ex:PenicilliumNotatum rdf:type ex:Mold .
+ex:Apartment201 rdf:type ex:Apartment ;
+    ex:hasNumber "201" ;
+    ex:hasType "one-bedroom" ;
+    ex:hasResidents (ex:JohnSmith ex:MarySmith) ;
+    ex:hasPreviousResident ex:SimonMurphy ;
+    ex:hasStartDate "2013-10-12"^^xsd:date .
 
-ex:MoldProducedSubstance rdf:type ex:BiologicalSubstance ;
-    ex:producedBy ex:PenicilliumNotatum ;
-    ex:killsBacteria ex:WideVarietyOfBacteria .
+ex:Apartment202 rdf:type ex:Apartment ;
+    ex:hasNumber "202" ;
+    ex:hasType "two-bedrooms" ;
+    ex:hasResidents (ex:JimOBrien ex:HarryOBrien) ;
+    ex:hasStartDate "2001-05-12"^^xsd:date .
 
-ex:DevelopmentOfAntibiotics rdf:type ex:ScientificDevelopment ;
-    ex:ledBy ex:Alexander_Fleming ;
-    ex:marksTurningPointInMedicine "significant turning point in the treatment of bacterial infections" .
+ex:JohnSmith rdf:type foaf:Person ;
+    foaf:name "John Smith" .
 
-ex:WideVarietyOfBacteria rdf:type ex:Bacterium .
+ex:MarySmith rdf:type foaf:Person ;
+    foaf:name "Mary Smith" .
 
-ex:ScientificDiscovery rdf:type rdf:Class .
-ex:Scientist rdf:type rdf:Class .
-ex:Mold rdf:type rdf:Class .
-ex:BiologicalSubstance rdf:type rdf:Class .
-ex:ScientificDevelopment rdf:type rdf:Class .
-ex:Bacterium rdf:type rdf:Class .
+ex:SimonMurphy rdf:type foaf:Person ;
+    foaf:name "Simon Murphy" .
+
+ex:JimOBrien rdf:type foaf:Person ;
+    foaf:name "Jim O'Brien" .
+
+ex:HarryOBrien rdf:type foaf:Person ;
+    foaf:name "Harry O'Brien" .
+
+ex:Apartment rdf:type rdf:Class .
+ex:Floor rdf:type rdf:Class .
+ex:Building rdf:type rdf:Class .
+foaf:Person rdf:type rdf:Class . 
 eof
 
 Input: $prompt

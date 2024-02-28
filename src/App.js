@@ -9,8 +9,10 @@ import cytoscape from 'cytoscape';
 
 var arch;
 
+// modelo viejo, deprecado -> "text-davinci-003"
+
 const DEFAULT_PARAMS = {
-  "model": "text-davinci-003",
+  "model": "gpt-3.5-turbo-instruct",
   "temperature": 0.3,
   "max_tokens": 800,
   "top_p": 1,
@@ -210,9 +212,44 @@ function rdfToDot(rdf) {
     if (line.startsWith('@prefix')) {
       continue; // Ignorar declaraciones de prefijo
     }
-
     if (line.trim() === '.') {
       continue; // Ignorar delimitadores de declaración RDF
+    }
+    //para identificar listas
+    const tieneParentesis = /\(([^)]+)\)/;
+    if(tieneParentesis.test(line)){
+      let lista = line.split("(")[1].split(")")[0];
+      let elementos = lista.split(/\s+/);//lista de objetos
+      console.log("Estos son los elementos: ",elementos);
+      let subAndPred = line.split("(")[0];//sujeto y predicado
+      let [subject, predicate] = subAndPred.split(/\s+/);
+      if(predicate === null || predicate === undefined || predicate === ""){  
+        predicate = subject;
+        subject = sub;
+      }
+      else{
+        sub = subject;
+      }
+      for (const element of elementos) {
+        dotStatements.push(`"${subject}" -> "${element}" [label="${predicate}"]`);
+      }
+      continue;
+    }
+    //para identificar nombres
+    const tieneComillas = /"([^"]+)"/;
+    if(tieneComillas.test(line)){
+      let lista = line.split('"')[1];
+      console.log("Esta es la lista: ",lista);
+      let [subject, predicate] = line.split('"')[0].split(/\s+/);
+      if(predicate === null || predicate === undefined || predicate === ""){  
+        predicate = subject;
+        subject = sub;
+      }
+      else{
+        sub = subject;
+      }
+      dotStatements.push(`"${subject}" -> "${lista}" [label="${predicate}"]`);
+      continue;
     }
 
     // Dividir la línea en sujeto y predicado
@@ -258,7 +295,40 @@ function rdfToJSON(rdf) {
     if (line.trim() === '.') {
       continue; // Ignorar delimitadores de declaración RDF
     }
-
+    //para identificar listas
+    const tieneParentesis = /\(([^)]+)\)/;
+    if(tieneParentesis.test(line)){
+      let lista = line.split("(")[1].split(")")[0];
+      let elementos = lista.split(/\s+/);//lista de objetos
+      let subAndPred = line.split("(")[0];//sujeto y predicado
+      let [subject, predicate] = subAndPred.split(/\s+/);
+      if(predicate === null || predicate === undefined || predicate === ""){  
+        predicate = subject;
+        subject = sub;
+      }
+      else{
+        sub = subject;
+      }
+      for (const element of elementos) {
+        guardar(subject, predicate, element);
+      }
+      continue;
+    }
+    //para identificar nombres
+    const tieneComillas = /"([^"]+)"/;
+    if(tieneComillas.test(line)){
+      let lista = line.split('"')[1];
+      let [subject, predicate] = line.split('"')[0].split(/\s+/);
+      if(predicate === null || predicate === undefined || predicate === ""){  
+        predicate = subject;
+        subject = sub;
+      }
+      else{
+        sub = subject;
+      }
+      guardar(subject, predicate, lista);
+      continue;
+    }
     // Dividir la línea en sujeto y predicado
     let [subject, predicate, object] = line.split(/\s+/);
     
@@ -280,24 +350,25 @@ function rdfToJSON(rdf) {
       [subject, predicate, object] = [subject, predicate, object].replace(/"{2}/g, '"');
     }
 
-    // Ignorar líneas que no tienen un sujeto o predicado válido
-    if (subject && predicate && object){
-      nodes.push({data : {id : `${subject}`}});
-      nodes.push({data : {id : `${object}`}});
-      if(!edgesRep.some(edge => edge.id === `${predicate}`)){
-        edgesRep.push({id : `${predicate}`, cant : 1});
-        edges.push({data : {id : `${predicate}`, source : `${subject}`, target : `${object}`, label : `${predicate}`}});
-      }
-      else{
-        let ident = edgesRep.find(edge => edge.id === `${predicate}`).cant;
-        let index = edgesRep.findIndex(edge => edge.id === `${predicate}`);
-        edgesRep[index] = ({id : `${predicate}`, cant : ident + 1});
-        edges.push({data : {id : `${predicate}-${ident}`, source : `${subject}`, target : `${object}`, label : `${predicate}`}});
+    guardar(subject, predicate, object);
+    function guardar(subject, predicate, object){
+      // Ignorar líneas que no tienen un sujeto o predicado válido
+      if (subject && predicate && object){
+        nodes.push({data : {id : `${subject}`}});
+        nodes.push({data : {id : `${object}`}});
+        if(!edgesRep.some(edge => edge.id === `${predicate}`)){
+          edgesRep.push({id : `${predicate}`, cant : 1});
+          edges.push({data : {id : `${predicate}`, source : `${subject}`, target : `${object}`, label : `${predicate}`}});
+        }
+        else{
+          let ident = edgesRep.find(edge => edge.id === `${predicate}`).cant;
+          let index = edgesRep.findIndex(edge => edge.id === `${predicate}`);
+          edgesRep[index] = ({id : `${predicate}`, cant : ident + 1});
+          edges.push({data : {id : `${predicate}-${ident}`, source : `${subject}`, target : `${object}`, label : `${predicate}`}});
+        }
       }
     }
   }
-  console.log("Nodos: ",nodes);
-  console.log("Aristas: ",edges);
   return {nodes : nodes, edges : edges};
 }
 //para ver el codigo rdf y poder editarlo
@@ -529,7 +600,7 @@ function App() {
       .then(promp => {
         console.log("Esta es la prompt que escribi: ",promp)
 
-        const params = { ...DEFAULT_PARAMS,model: "gpt-3.5-turbo-instruct",prompt: promp, stop: "eof"};
+        const params = { ...DEFAULT_PARAMS,prompt: promp, stop: "eof"};
 
         const requestOptions = {
           method: 'POST',
