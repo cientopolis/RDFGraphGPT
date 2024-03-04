@@ -598,8 +598,6 @@ function App() {
       .then(response => response.text())
       .then(text => text.replace("$prompt", promp))
       .then(promp => {
-        console.log("Esta es la prompt que escribi: ",promp)
-
         const params = { ...DEFAULT_PARAMS,prompt: promp, stop: "eof"};
 
         const requestOptions = {
