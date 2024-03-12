@@ -726,13 +726,13 @@ function App() {
       <div  className="select-container" >
         <div>
           <select  className="select">
-            <option value="DIFFERENT">New archive</option>
-            <option value="SAME">Existent archive</option>
+            <option value="DIFFERENT">New file</option>
+            <option value="SAME">Existent file</option>
           </select>
         </div>
         
         <div className="nameContainer">
-          <input className="archName" placeholder="Enter the name of the archive..."></input>
+          <input className="archName" placeholder="Enter the name of the file..."></input>
         </div>
       </div>
       <br/>
