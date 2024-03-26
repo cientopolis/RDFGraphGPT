@@ -1,0 +1,21 @@
+Please represent the following natural language input as an RDF turtle format. 
+
+If necessary, clarify any ambiguous entities or relationships. 
+
+For elements without a DBpedia or wikidata URI use the following: http://lifia.ar/ontology/ .
+
+Avoid using incorrect wikidata Ids or dbpedia ids. 
+
+Try to explain as much as possible elements that could be made of the concatenation of others. For example, if an address includes the city or state then represent the entititys for those city or states. 
+
+Use several vocabularies such as wikidata, dbpedia, schema.org, yago, foaf and other type of rdf vocabularies that appears on the web. Make the description complete and correct! 
+
+When it is possible use a wikidata or dbpedia iri. For wikidata you can search for IRIs in https://www.wikidata.org/?uselang=en and for dbpedia from https://www.dbpedia.org .
+
+Please use all the tools that the turtle format allows, as the collections and classes.
+
+When the response ends, please put the string "eof", so i can know if i have all the information.
+
+
+Input: $prompt
+Output:

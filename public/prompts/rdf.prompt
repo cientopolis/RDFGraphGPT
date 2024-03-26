@@ -2,7 +2,17 @@ Please represent the following natural language input as an RDF turtle format.
 
 If necessary, clarify any ambiguous entities or relationships. 
 
-When it is possible use a wikidata iri. Please use all the tools that the turtle format allows, as the collections, classes and properties.
+For elements without a DBpedia or wikidata URI use the following: http://lifia.ar/ontology/ .
+
+Avoid using incorrect wikidata Ids or dbpedia ids. 
+
+Try to explain as much as possible elements that could be made of the concatenation of others. For example, if an address includes the city or state then represent the entititys for those city or states. 
+
+Use several vocabularies such as wikidata, dbpedia, schema.org, yago, foaf and other type of rdf vocabularies that appears on the web. Make the description complete and correct! 
+
+When it is possible use a wikidata or dbpedia iri. For wikidata you can search for IRIs in https://www.wikidata.org/?uselang=en and for dbpedia from https://www.dbpedia.org .
+
+Please use all the tools that the turtle format allows, as the collections and classes.
 
 When the response ends, please put the string "eof", so i can know if i have all the information.
 
@@ -20,16 +30,19 @@ O’Brien; Jim has been living there since May 12th , 2001 and Harry since
 June 5th , 2009. Apartment 202 has two bedrooms"
 
 Output:
-@prefix ex: <http://example.org/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://lifia.ar/ontology/> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+@prefix schema: <http://schema.org/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
-ex:ApartmentBlock rdf:type ex:Building ;
+ex:ApartmentBlock rdf:type ex:ApartmentBlock ;
     ex:hasAddress "146, 5th Avenue, New York, US" ;
-    ex:hasFloors "24"^^xsd:integer ;
-    ex:hasApartments "120"^^xsd:integer ;
-    ex:constructionYear "1976"^^xsd:integer .
+    ex:hasFloors 24 ;
+    ex:hasApartments 120 ;
+    ex:wasConstructedInYear 1976 .
+    ex:hasFloor ex:SecondFloor .
 
 ex:SecondFloor rdf:type ex:Floor ;
     ex:belongsTo ex:ApartmentBlock ;
@@ -37,16 +50,16 @@ ex:SecondFloor rdf:type ex:Floor ;
 
 ex:Apartment201 rdf:type ex:Apartment ;
     ex:hasNumber "201" ;
-    ex:hasType "one-bedroom" ;
+    ex:hasType ex:OneBedroom ;
     ex:hasResidents (ex:JohnSmith ex:MarySmith) ;
     ex:hasPreviousResident ex:SimonMurphy ;
-    ex:hasStartDate "2013-10-12"^^xsd:date .
+    ex:hasStartDate "2013-10-12"^^xsd:date ;
 
 ex:Apartment202 rdf:type ex:Apartment ;
     ex:hasNumber "202" ;
-    ex:hasType "two-bedrooms" ;
+    ex:hasType ex:TwoBedrooms ;
     ex:hasResidents (ex:JimOBrien ex:HarryOBrien) ;
-    ex:hasStartDate "2001-05-12"^^xsd:date .
+    ex:hasStartDate "2001-05-12"^^xsd:date ;
 
 ex:JohnSmith rdf:type foaf:Person ;
     foaf:name "John Smith" .
@@ -54,18 +67,22 @@ ex:JohnSmith rdf:type foaf:Person ;
 ex:MarySmith rdf:type foaf:Person ;
     foaf:name "Mary Smith" .
 
-ex:SimonMurphy rdf:type foaf:Person ;
-    foaf:name "Simon Murphy" .
-
 ex:JimOBrien rdf:type foaf:Person ;
-    foaf:name "Jim O'Brien" .
+    foaf:name "Jim O’Brien" .
 
 ex:HarryOBrien rdf:type foaf:Person ;
-    foaf:name "Harry O'Brien" .
+    foaf:name "Harry O’Brien" .
 
+ex:OneBedroom rdf:type ex:RoomType ;
+    ex:hasDescription "One bedroom apartment" .
+
+ex:TwoBedrooms rdf:type ex:RoomType ;
+    ex:hasDescription "Two bedrooms apartment" .
+
+ex:ApartmentBlock rdf:type rdf:Class .
 ex:Apartment rdf:type rdf:Class .
 ex:Floor rdf:type rdf:Class .
-ex:Building rdf:type rdf:Class .
+ex:RoomType rdf:type rdf:Class .
 foaf:Person rdf:type rdf:Class . 
 eof
 
