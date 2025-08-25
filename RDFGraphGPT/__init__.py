@@ -58,6 +58,12 @@ dbo:birthDate rdf:type rdf:Property .
 dbo:birthPlace rdf:type rdf:Property
 
 """
+
+text_example_OVS = ""
+rdf_example_OVS = """
+
+"""
+
 #funcion para pasar a dot
 def rdf_to_dot(rdf_file, dot_file):
     # Crear un nuevo grafo RDF    
@@ -96,9 +102,42 @@ def rdf_to_dot(rdf_file, dot_file):
     # except Exception as e:
     #     print(f"Error visualizing the graph: {e}")
         
-def generate_graph(text, api_key, place, file_name):
+def generate_graph(text, place, file_name):
     filename = file_name + ".ttl"
 
+    # Define the directory and file path
+    directory = "results"
+    # file_name = "output.ttl"
+    file_path = os.path.join(directory, filename)
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        
+    response = api_fetch(text)
+    
+    # Write to the file 
+    if(place == "DIFFERENT"):
+        with open(file_path, "w") as file:
+            file.write(response.choices[0].message.content)
+    else:
+        with open(file_path, "a") as file:
+            file.write(response.choices[0].message.content)
+
+    rdf_file = 'results/' + filename
+    dot_file = 'results/archivo.dot'
+
+    exception = rdf_to_dot(rdf_file, dot_file)
+    
+    if exception:
+        return exception
+    else:
+        svg_file = os.path.join(STATIC_DIR, 'archivo.svg')
+        subprocess.run(['dot', '-Tsvg', dot_file, '-o', svg_file])
+        
+
+def generate_ovs_graph(text, place, file_name):
+    filename = file_name + ".ttl"
     # Define the directory and file path
     directory = "results"
     # file_name = "output.ttl"
@@ -185,6 +224,24 @@ def api_fetch(text):
     return response
     # +" Please just translate the text, don't add any extra information; and when the response ends, put the string eof."
     
+def api_fetch_OVS(text):
+    with open("static/inmontology.owl", "r", encoding="utf-8") as f:
+        ontology_text = f.read()
+        
+    response = client.chat.completions.create(
+    model="gpt-4-turbo",
+    messages=[
+        {"role": "system", "content": "You are a helpful RDF turtle format expert. You know how to use clasess, properties and collections."},
+        {"role": "system", "content": "You help translating natural text into rdf turtle format graphs. The explanation of it is not needed."},
+        {"role": "system", "content": "I need you to use the inmontology.owl terms to build instances of a real state listings graph."},
+        {"role": "system", "content": "This is the ontology that you have to use:\n" + ontology_text},
+        {"role": "user", "content": "Please translate this natural languaje real state listing into RDF turtle format instance of the graph: "+text_example_OVS },
+        {"role": "assistant", "content": rdf_example_OVS},
+        {"role": "user", "content": "Please translate this natural languaje real state listing into RDF turtle format instance of the graph: "+text }
+    ]
+    )
+    return response
+
 def search_file(file_name):
     directory = "results"
     file_path = os.path.join(directory, file_name + ".ttl")

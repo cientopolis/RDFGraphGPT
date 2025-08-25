@@ -1,10 +1,10 @@
 from flask import Flask, request, render_template, url_for
-from RDFGraphGPT import generate_graph, generate_graph_having_rdf, search_file, get_files_in_directory
+from RDFGraphGPT import generate_graph, generate_graph_having_rdf, search_file, get_files_in_directory, generate_ovs_graph
 from RDFGraphGPT import graph_from_file as gff
 import os
 
 app = Flask(__name__)
-app.debug = True
+app.config["DEBUG"] = True
 
 @app.route("/", methods=["GET", "POST"])
 def graph():
@@ -12,12 +12,11 @@ def graph():
         # Obtiene los datos del formulario
         form_data = request.form
         text = form_data.get('text')
-        api_key = form_data.get('api-key')
         place = "DIFFERENT"
         file_name = form_data.get('file-name')
         svg_url = url_for('static', filename='archivo.svg')
         
-        exception = generate_graph(text, api_key,place, file_name)
+        exception = generate_graph(text, place, file_name)
         
         if exception:
             rdf_text = search_file(file_name)
@@ -52,12 +51,11 @@ def graph_existent():
         # Obtiene los datos del formulario
         form_data = request.form
         text = form_data.get('text')
-        api_key = form_data.get('api-key')
         place = "SAME"
         file_name = form_data.get('file-name')
         svg_url = url_for('static', filename='archivo.svg')
         
-        exception = generate_graph(text, api_key,place, file_name)
+        exception = generate_graph(text, place, file_name)
         
         if exception:
             rdf_text = search_file(file_name)
@@ -86,7 +84,27 @@ def graph_from_file():
         
     return render_template('from_file.html', files=files)
 
-if __name__ == "__name__":
-    app.run()
+@app.route("/ovs_new_instance", methods=["GET","POST"])
+def ovs_new_instance():
+    if request.method == "POST":
+        # Obtiene los datos del formulario
+        form_data = request.form
+        text = form_data.get('text')
+        place = "DIFFERENT"
+        file_name = form_data.get('file-name')
+        svg_url = url_for('static', filename='archivo.svg')
+        
+        exception = generate_ovs_graph(text, place, file_name)
+        
+        if exception:
+            rdf_text = search_file(file_name)
+            return render_template('edit.html', rdf_text=rdf_text, error=exception)
+        else:
+            return render_template('graph.html', graph=svg_url)
+        
+    return render_template('ovs_new_instance.html')
+
+# if __name__ == "__main__":
+#     app.run()
 
 #poetry run flask --app index run

@@ -53,7 +53,7 @@
             background-color: #7FB3D5; /* Color de fondo al pasar el mouse */
             color: black; /* Mantiene el color del texto negro */
         }
-        
+
         .content {
             margin-left: 250px; /* Matches sidebar width */
             padding: 15px;
@@ -77,6 +77,10 @@
             display: flex;
             align-items: center;
         }
+        .dropdown-menu {
+            background-color: #96C6E6; 
+        }
+
 
     </style>
 </head>
@@ -104,6 +108,15 @@
             </li>
             <li class="nav-item">
                 <a  href="{{url_for('graph_from_file')}}">Graficar un archivo RDF</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    OVS + RDFGraphGPT
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{url_for('ovs_new_instance')}}">Crear instancias del grafo</a></li>
+                    <li><a class="dropdown-item" href="#">Preguntarle al grafo</a></li>
+                </ul>
             </li>
         </ul>
     </div>
