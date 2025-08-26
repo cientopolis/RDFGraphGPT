@@ -20,7 +20,8 @@ def graph():
         
         if exception:
             rdf_text = search_file(file_name)
-            return render_template('edit.html', rdf_text=rdf_text, error=exception)
+            files = get_files_in_directory("results")
+            return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
         else:
             return render_template('graph.html', graph=svg_url)
         
@@ -39,7 +40,8 @@ def save():
     exception = generate_graph_having_rdf(rdf_text, place, file_name)
         
     if exception:
-        return render_template('edit.html', rdf_text=rdf_text, error=exception)
+        files = get_files_in_directory("results")
+        return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
     else:
         return render_template('graph.html', graph=svg_url)
 
@@ -59,7 +61,7 @@ def graph_existent():
         
         if exception:
             rdf_text = search_file(file_name)
-            return render_template('edit.html', rdf_text=rdf_text, error=exception)
+            return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
         else:
             return render_template('graph.html', graph=svg_url)
     
@@ -78,7 +80,7 @@ def graph_from_file():
         exception = gff(file_name)
         
         if exception:
-            return render_template('edit.html', rdf_text=rdf_text, error=exception)
+            return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
         else:
             return render_template('from_file.html', files=files,graph=svg_url)
         
@@ -98,7 +100,8 @@ def ovs_new_instance():
         
         if exception:
             rdf_text = search_file(file_name)
-            return render_template('edit.html', rdf_text=rdf_text, error=exception)
+            files = get_files_in_directory("results")
+            return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
         else:
             return render_template('graph.html', graph=svg_url)
         

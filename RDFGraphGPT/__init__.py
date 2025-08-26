@@ -169,10 +169,7 @@ def generate_ovs_graph(text, place, file_name):
         subprocess.run(['dot', '-Tsvg', dot_file, '-o', svg_file])
 
 def generate_graph_having_rdf(rdf_text, place, file_name):
-    if (place == "DIFFERENT"):
-        filename = file_name + ".ttl"
-    else:
-        filename = file_name + ".ttl" #Aca despues tengo que agregar el select de los que ya existen
+    filename = file_name + ".ttl"
 
     # Define the directory and file path
     directory = "results"
