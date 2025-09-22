@@ -28,8 +28,13 @@
         <label for="api-key" class="form-label"></label>
         <br/>
         <div class="d-grid gap-2">
-          <button class="btn btn-light boton-basico" type="submit">Generar grafo</button>
+          <button class="btn btn-light boton-basico" type="submit" id="btn">Generar grafo</button>
+          <button class="btn btn-light" type="button" style="display:none; background-color:#7FB3D5; " id="btnCargando" disabled>
+            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <span role="status">Cargando...</span>
+          </button>
         </div>
       </form>
     </div>
+    <script src="../static/js/scripts.js"></script>
 {% endblock %}

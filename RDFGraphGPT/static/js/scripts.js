@@ -20,3 +20,14 @@
     document.getElementById("respuesta-pregunta").innerText = selectedRespuesta;
 
   }
+
+  //logica para loading de botones
+  const btn = document.getElementById('btn');
+  const btnCargando = document.getElementById('btnCargando');
+
+
+  btn.addEventListener('click', () => {
+
+    btn.style.display = 'none';
+    btnCargando.style.display = 'inline-block';
+  });

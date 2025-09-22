@@ -11,7 +11,7 @@
     {% endif %}
     <form action="/save-rdf" method="post">
         <select class="form-select" name="file-name" for="file-name" id="file-name" aria-label="Default select example" required>
-          <option value="" selected disabled>Elija el archivo a extender</option>
+          <option value="" selected disabled>Elija el archivo a editar</option>
           {% for file in files %}
           <option for="file-name" value="{{file}}">{{file}}</option>
           {% endfor %}
@@ -23,7 +23,12 @@
         </div>
         <br>
         <div class="d-grid gap-2">
-          <button class="btn btn-light" type="submit" style="background-color:#7FB3D5; ">Editar</button>
+          <button class="btn btn-light" type="submit" style="background-color:#7FB3D5; " id="btn">Editar</button>
+          <button class="btn btn-light" type="button" style="display:none; background-color:#7FB3D5;" id="btnCargando" disabled>
+            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <span role="status">Cargando...</span>
+          </button>
         </div>
     </form>
+    <script src="../static/js/scripts.js"></script>
 {% endblock %}
