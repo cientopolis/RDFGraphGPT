@@ -80,8 +80,25 @@
         .dropdown-menu {
             background-color: #96C6E6; 
         }
-
-
+        .boton-basico {
+            background-color: #7FB3D5;
+            border-color: #376889ff;
+        }
+        .boton-basico:hover {
+            background-color: #96C6E6;
+            color: black;
+            border-color: #376889ff;
+        }
+        .btn-check:not(:checked) + .btn:hover {
+            background-color: #96C6E6;
+            color: black;
+            border-color: #376889ff;
+        }
+        .btn-check:checked + .btn {
+            background-color: #376889ff;
+            color: white;
+            border-color: #376889ff;
+        }
     </style>
 </head>
 <body>
@@ -115,7 +132,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="{{url_for('ovs_new_instance')}}">Crear instancias del grafo</a></li>
-                    <li><a class="dropdown-item" href="#">Preguntarle al grafo</a></li>
+                    <li><a class="dropdown-item" href="{{url_for('questions')}}">Preguntarle al grafo</a></li>
                 </ul>
             </li>
         </ul>

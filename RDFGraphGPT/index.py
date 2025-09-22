@@ -1,7 +1,10 @@
+from typing import List
 from flask import Flask, request, render_template, url_for
 from RDFGraphGPT import generate_graph, generate_graph_having_rdf, search_file, get_files_in_directory, generate_ovs_graph
 from RDFGraphGPT import graph_from_file as gff
 import os
+
+from RDFGraphGPT.preguntas_ovs import PreguntaOVS
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
@@ -107,7 +110,38 @@ def ovs_new_instance():
         
     return render_template('ovs_new_instance.html')
 
-# if __name__ == "__main__":
-#     app.run()
+@app.route("/questions", methods=["GET", "POST"])
+def questions():
+    if request.method == "POST":
+        # Handle the form submission
+        pass
+    
+    p1 = PreguntaOVS(
+        id="001",
+        pregunta="¿Cuál es el precio del local?",
+        query="SELECT ?precio WHERE { ... }",
+        respuesta="El precio del local es de $1000.",
+        grafo="io:listing_site2_A1405300735 ..."
+    )
+
+    p2 = PreguntaOVS(
+        id="002",
+        pregunta="¿Dónde está ubicado el local?",
+        query="SELECT ?direccion WHERE { ... }",
+        respuesta="El local está ubicado en la calle Falsa 123.",
+        grafo="io:feature_address_real_estate_site2_A1405300735 ..."
+    )
+        
+    p3 = PreguntaOVS(
+        id="003",
+        pregunta="¿Cuáles son las características del local?",
+        query="SELECT ?caracteristicas WHERE { ... }",
+        respuesta="El local tiene 3 habitaciones y 2 baños.",
+        grafo="io:feature_caracteristicas_real_estate_site2_A1405300735 ..."
+    )
+
+    preguntas: List[PreguntaOVS] = [p1, p2, p3]
+    return render_template('questions.html', preguntas=preguntas)
+
 
 #poetry run flask --app index run

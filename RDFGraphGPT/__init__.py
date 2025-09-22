@@ -1,4 +1,6 @@
+from typing import List
 from openai import OpenAI
+from RDFGraphGPT.preguntas_ovs import PreguntaOVS
 import rdflib
 import pygraphviz as pgv
 import os
@@ -59,9 +61,45 @@ dbo:birthPlace rdf:type rdf:Property
 
 """
 
-text_example_OVS = ""
+text_example_OVS = """
+Local Mar Del Plata Vendo O Permuto Por Auto U$s 19.000
+Se vende local comercial en Mar del Plata, ubicado en Luro e Independencia 3212, zona Centro.
+El precio es de USD 19.000, con una base de USD 17.500.
+Propietario vende o permuta por auto.
+"""
 rdf_example_OVS = """
+io:listing_site2_A1405300735 a pronto:RealEstateListing ;
+rdfs:label "Local Mar Del Plata Vendo O Permuto Por Auto U$s 19.000"^^xsd:string ;
+dc:date "2024-01-29T00:00:00"^^xsd:dateTime ;
+gr:hasBusinessFunction gr:Sell ;
+sioc:about io:real_estate_site2_A1405300735 ;
+sioc:has_creator io:account_site2_97219375 ;
+sioc:has_space pronto:site2 ;
+sioc:id "A1405300735"^^xsd:string ;
+sioc:read_at "2024-02-02T00:00:00"^^xsd:dateTime ;
+io:hasFeature [ a io:Precio ;
+    io:hasDetail [ a io:TemporalFeature ;
+    io:hasScraperTime [ a time:Instant ;
+        time:inXSDDateTimeStamp "2024-02-02T00:00:00"^^xsd:dateTime ] ;
+    io:hasScraperValue [ a gr:UnitPriceSpecification ;
+        gr:hasCurrency "USD"^^xsd:string ;
+        gr:hasCurrencyValue "17500.0"^^xsd:float ;
+        gr:priceType "BASE"^^xsd:string ] ] ] .
 
+io:real_estate_site2_A1405300735 a io:Local ;
+io:hasFeature io:feature_address_real_estate_site2_A1405300735 ;
+rec:includes io:space_building_site2_A1405300735,
+io:space_land_site2_A1405300735 .
+
+io:feature_address_real_estate_site2_A1405300735 a io:Direccion ;
+io:hasDetail [ a io:TemporalFeature ;
+    io:hasScraperTime [ a time:Instant ;
+        time:inXSDDateTimeStamp "2024-02-02T00:00:00"^^xsd:dateTime ] ;
+    io:hasScraperValue [ a io:PostalAddress ;
+        io:address "luro e independencia 3212"^^xsd:string ;
+        io:city io:district_Mar%20del%20Plata_Bs.As.%20Costa%20Atlántica ;
+        io:neighborhood io:neiborhood_province_Bs.As.%2520Costa%2520Atlática_district_Mar%2520del%2520Plata_Bs.As.%2520Costa%2520Atlántica_Centro ;
+    io:province io:province_Bs.As.%20Costa%20Atlántica ] ] .
 """
 
 #funcion para pasar a dot
@@ -147,7 +185,7 @@ def generate_ovs_graph(text, place, file_name):
     if not os.path.exists(directory):
         os.makedirs(directory)
         
-    response = api_fetch(text)
+    response = api_fetch_OVS(text)
     
     # Write to the file 
     if(place == "DIFFERENT"):
@@ -230,11 +268,11 @@ def api_fetch_OVS(text):
     messages=[
         {"role": "system", "content": "You are a helpful RDF turtle format expert. You know how to use clasess, properties and collections."},
         {"role": "system", "content": "You help translating natural text into rdf turtle format graphs. The explanation of it is not needed."},
-        {"role": "system", "content": "I need you to use the inmontology.owl terms to build instances of a real state listings graph."},
+        {"role": "system", "content": "I need you to use the inmontology.owl terms to build instances of a real estate listings graph."},
         {"role": "system", "content": "This is the ontology that you have to use:\n" + ontology_text},
-        {"role": "user", "content": "Please translate this natural languaje real state listing into RDF turtle format instance of the graph: "+text_example_OVS },
+        {"role": "user", "content": "Please translate this natural languaje real estate listing into RDF turtle format instance of the graph: "+text_example_OVS },
         {"role": "assistant", "content": rdf_example_OVS},
-        {"role": "user", "content": "Please translate this natural languaje real state listing into RDF turtle format instance of the graph: "+text }
+        {"role": "user", "content": "Please translate this natural languaje real estate listing into RDF turtle format instance of the graph: "+text }
     ]
     )
     return response
