@@ -184,7 +184,38 @@ def api_fetch(text):
     )
     return response
     # +" Please just translate the text, don't add any extra information; and when the response ends, put the string eof."
-    
+
+
+def api_fetch_mejorada(text):
+    # PROBAR Y DETERMINAR SI DEVUELVE MEJORES RDF !!
+    system_prompt = f"""
+    You are an expert data engineer specializing in knowledge graphs. 
+    Your task is to convert unstructured text into a structured RDF graph using the Turtle (.ttl) syntax.
+
+    Follow these rules STRICTLY:
+    1.  **Output Format**: Your response MUST only contain the raw RDF Turtle code. Do not include any explanations, comments, or introductory text like "Here is the RDF code:".
+    2.  **Prefixes**: Always use the following standard prefixes:
+        - `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .`
+        - `@prefix dbo: <http://dbpedia.org/ontology/> .`
+        - `@prefix dbr: <http://dbpedia.org/resource/> .`
+        - `@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .`
+        - `@prefix lifia: <https://raw.githubusercontent.com/cientopolis/OVS-inmontology/refs/heads/main/inmontology.owl> .`
+    3.  **Vocabulary**: Prioritize using terms from `dbo:` (DBpedia Ontology) and `dbr:` (DBpedia Resource) whenever possible. If a suitable term does not exist, use the `lifia:` prefix.
+    4.  **Entity Naming**: Convert multi-word entities into `dbr:CamelCase` format (e.g., "Lenovo Tenerife" becomes `dbr:Lenovo_Tenerife`).
+    5.  **Data Types**: Use appropriate XSD datatypes for literal values, especially for dates (`xsd:date`), numbers (`xsd:integer`), and years (`xsd:gYear`).
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4-turbo",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": text_example},
+            {"role": "assistant", "content": rdf_example},
+            {"role": "user", "content": text}
+        ]
+    )
+    return response
+
 def search_file(file_name):
     directory = "results"
     file_path = os.path.join(directory, file_name + ".ttl")
