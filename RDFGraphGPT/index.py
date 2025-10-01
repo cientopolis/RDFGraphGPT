@@ -8,6 +8,7 @@ from RDFGraphGPT.preguntas_ovs import PreguntaOVS
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
+nombre_grafo = "grafo_la_plata_mini"
 
 @app.route("/", methods=["GET", "POST"])
 def graph():
@@ -92,11 +93,11 @@ def graph_from_file():
 @app.route("/ovs_new_instance", methods=["GET","POST"])
 def ovs_new_instance():
     if request.method == "POST":
-        # Obtiene los datos del formulario
         form_data = request.form
         text = form_data.get('text')
-        place = "DIFFERENT"
-        file_name = form_data.get('file-name')
+        place = "SAME" #Aca va a ser siempre SAME
+        # file_name = form_data.get('file-name') #Poner aca nombre del archivo del grafo
+        file_name = nombre_grafo
         svg_url = url_for('static', filename='archivo.svg')
         
         exception = generate_ovs_graph(text, place, file_name)
@@ -108,7 +109,7 @@ def ovs_new_instance():
         else:
             return render_template('graph.html', graph=svg_url)
         
-    return render_template('ovs_new_instance.html')
+    return render_template('ovs_new_instance.html', nombre_grafo=nombre_grafo)
 
 @app.route("/questions", methods=["GET", "POST"])
 def questions():
