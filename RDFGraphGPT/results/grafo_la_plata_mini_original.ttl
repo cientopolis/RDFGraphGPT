@@ -1,0 +1,191 @@
+@prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix geo: <http://www.opengis.net/ont/geosparql#> .
+@prefix gr: <http://purl.org/goodrelations/v1#> .
+@prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rec: <https://w3id.org/rec#> .
+@prefix sioc: <http://rdfs.org/sioc/ns#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:listing_site2_A1112642299 a pronto:RealEstateListing ;
+    rdfs:label "Casa De 2 Dormitorios Y Patio, La Plata"^^xsd:string ;
+    dc:date "2021-11-16T00:00:00"^^xsd:dateTime ;
+    gr:hasBusinessFunction gr:Sell ;
+    sioc:about :real_estate_site2_A1112642299 ;
+    sioc:has_space pronto:site2 ;
+    sioc:id "A1112642299"^^xsd:string ;
+    sioc:read_at "2024-02-02T00:00:00"^^xsd:dateTime ;
+    :hasFeature :feature_price_1_listing_site2_A1112642299 ;
+    foaf:maker :agent_Christopher%20Williamson .
+
+:feature_price_1_listing_site2_A1112642299 a :Price ;
+    :hasOrigin :Scraper ;
+    :hasValue [ a gr:UnitPriceSpecification ;
+            gr:hasCurrency "USD"^^xsd:string ;
+            gr:hasCurrencyValue "85000.0"^^xsd:float ;
+            gr:priceType "BASE"^^xsd:string ] ;
+    time:hasTime [ a time:Instant ;
+            time:inXSDDateTimeStamp "2024-02-02T00:00:00"^^xsd:dateTime ] .
+
+:feature_address_2_real_estate_site2_A1112642299 a :Address ;
+    :hasOrigin :AVE ;
+    :hasValue [ a :PostalAddress ;
+            :address "68 entre 5 y 6"^^xsd:string ;
+            :city :district_Bs.As._G.B.A._Sur_La_Plata ;
+            :neighborhood :neighborhood_La_Plata_district_Bs.As._G.B.A._Sur_La_Plata_province_Bs.As._G.B.A._Sur ;
+            :province :province_Bs.As._G.B.A._Sur ] ;
+    time:hasTime [ a time:Instant ;
+            time:inXSDDateTimeStamp "2025-03-01T00:00:00"^^xsd:dateTime ] .
+
+:feature_address_1_real_estate_site2_A1112642299 a :Address ;
+    :hasOrigin :Scraper ;
+    :hasValue [ a :PostalAddress ;
+            :address "68 542"^^xsd:string ;
+            :city :district_Bs.As._G.B.A._Sur_La_Plata ;
+            :neighborhood :neighborhood_La_Plata_district_Bs.As._G.B.A._Sur_La_Plata_province_Bs.As._G.B.A._Sur ;
+            :province :province_Bs.As._G.B.A._Sur ] ;
+    time:hasTime [ a time:Instant ;
+            time:inXSDDateTimeStamp "2024-02-02T00:00:00"^^xsd:dateTime ] .
+
+:real_estate_site2_A1112642299 a :House ;
+    :hasFeature :feature_address_1_real_estate_site2_A1112642299,
+        :feature_address_2_real_estate_site2_A1112642299,
+        :feature_age_1_real_estate_site2_A1112642299 ;
+    rec:includes :space_building_site2_A1112642299,
+        :space_land_site2_A1112642299 .
+
+
+:feature_age_1_real_estate_site2_A1112642299 a :PropertyAge ;
+    :hasOrigin :AVE ;
+    :hasValue "1"^^xsd:string ;
+    time:hasTime [ a time:Instant ;
+            time:inXSDDateTimeStamp "2024-02-02T00:00:00"^^xsd:dateTime ] .
+
+:space_building_site2_A1112642299_bath_0 a rec:Bathroom .
+
+:space_building_site2_A1112642299_bed_0 a rec:Bedroom .
+
+:space_building_site2_A1112642299_bed_1 a rec:Bedroom .
+
+:space_building_site2_A1112642299 a rec:Building ;
+    :hasFeature :feature_es_monetizable_1_space_building_site2_A1112642299 ;
+    brick:hasPart :space_building_site2_A1112642299_bath_0,
+        :space_building_site2_A1112642299_bed_0,
+        :space_building_site2_A1112642299_bed_1 ;
+    pronto:has_number_of_rooms 4 .
+
+:space_land_site2_A1112642299 a rec:Site ;
+    geo:hasGeometry [ a geo:Geometry ;
+            geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/4326> POINT(-57.9311699 -34.926608)"^^geo:wktLiteral ] ;
+    :hasFeature :feature_covered_1_space_land_site2_A1112642299,
+        :feature_total_1_space_land_site2_A1112642299 ;
+    brick:hasPart :space_building_site2_A1112642299 .
+
+:feature_covered_1_space_land_site2_A1112642299 a :Surface ;
+    :hasOrigin :Scraper ;
+    :hasValue [ a pronto:SizeSpecification ;
+            gr:hasUnitOfMeasurement "m²"^^xsd:string ;
+            gr:hasValue "100.0"^^xsd:float ;
+            pronto:size_type "covered"^^xsd:string ] ;
+    time:hasTime [ a time:Instant ;
+            time:inXSDDateTimeStamp "2024-02-02T00:00:00"^^xsd:dateTime ] .
+
+:feature_total_1_space_land_site2_A1112642299 a :Surface ;
+    :hasOrigin :Scraper ;
+    :hasValue [ a pronto:SizeSpecification ;
+            gr:hasUnitOfMeasurement "m²"^^xsd:string ;
+            gr:hasValue "131.0"^^xsd:float ;
+            pronto:size_type "total"^^xsd:string ] ;
+    time:hasTime [ a time:Instant ;
+            time:inXSDDateTimeStamp "2024-02-02T00:00:00"^^xsd:dateTime ] .
+
+:feature_es_monetizable_1_space_building_site2_A1112642299 a :IsMonetizable ;
+    :hasOrigin :AVE ;
+    :hasValue true ;
+    time:hasTime [ a time:Instant ;
+            time:inXSDDateTimeStamp "2025-03-01T00:00:00"^^xsd:dateTime ] .
+
+
+:district_Bs.As._G.B.A._Sur_La_Plata a :City ;
+    rdfs:label "La Plata"^^xsd:string ;
+    rec:locatedIn :province_Bs.As._G.B.A._Sur .
+
+:province_Bs.As._G.B.A._Sur a :Province ;
+    rdfs:label "Bs.As. G.B.A. Sur"^^xsd:string .
+
+:neighborhood_La_Plata_district_Bs.As._G.B.A._Sur_La_Plata_province_Bs.As._G.B.A._Sur a :Neighborhood ;
+    rdfs:label "La Plata"^^xsd:string ;
+    rec:locatedIn :district_Bs.As._G.B.A._Sur_La_Plata .
+
+
+
+:feature_address_1_real_estate_site1_10180804 a :Address ;
+    :hasOrigin :AVE ;
+    :hasValue [ a :PostalAddress ;
+            :address "Diagonal 73 entre 21 y 22"^^xsd:string ;
+            :city :ddistrict_Bs.As._G.B.A._Sur_La_Plata ;
+            :neighborhood :neighborhood_La_Loma_district_Bs.As._G.B.A._Sur_La_Plata_province_Bs.As._G.B.A._Sur ;
+            :province :province_Bs.As._G.B.A._Sur ] ;
+    time:hasTime [ a time:Instant ;
+            time:inXSDDateTimeStamp "2025-03-01T00:00:00"^^xsd:dateTime ] .
+
+:real_estate_site1_10180804 a :House ;
+    :hasFeature :feature_address_1_real_estate_site1_10180804;
+    rec:includes :space_building_site1_10180804,
+        :space_land_site1_10180804 .
+
+:space_building_site1_10180804_bath_0 a rec:Bathroom .
+
+:space_building_site1_10180804_bath_1 a rec:Bathroom .
+
+:space_building_site1_10180804_bed_0 a rec:Bedroom .
+
+
+:space_building_site1_10180804 a rec:Building ;
+    brick:hasPart :space_building_site1_10180804_bath_0,
+        :space_building_site1_10180804_bath_1,
+        :space_building_site1_10180804_bed_0 .
+
+:space_land_site1_10180804 a rec:Site ;
+    geo:hasGeometry [ a geo:Geometry ;
+            geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/4326> POINT(-57.974106 -34.922237)"^^geo:wktLiteral ] ;
+    :hasFeature :feature_covered_1_space_land_site1_10180804 ;
+    brick:hasPart :space_building_site1_10180804 .
+
+:feature_covered_1_space_land_site1_10180804 a :Surface ;
+    :hasOrigin :Scraper ;
+    :hasValue [ a pronto:SizeSpecification ;
+            gr:hasUnitOfMeasurement "m²"^^xsd:string ;
+            gr:hasValue "45.0"^^xsd:float ;
+            pronto:size_type "covered"^^xsd:string ] ;
+    time:hasTime [ a time:Instant ;
+            time:inXSDDateTimeStamp "2024-02-04T00:00:00"^^xsd:dateTime ] .
+
+    
+:listing_site1_10180804 a pronto:RealEstateListing ;
+    rdfs:label "Casa en Venta en La Loma, La Plata"^^xsd:string ;
+    gr:hasBusinessFunction gr:Sell ;
+    sioc:about :real_estate_site1_10180804 ;
+    sioc:has_space pronto:site1 ;
+    sioc:id "10180804"^^xsd:string ;
+    sioc:read_at "2024-02-04T00:00:00"^^xsd:dateTime ;
+    :hasFeature :feature_price_1_listing_site1_10180804 ;
+    foaf:maker :agent_Marcus%20Schroeder .
+
+:feature_price_1_listing_site1_10180804 a :Price ;
+    :hasOrigin :Scraper ;
+    :hasValue [ a gr:UnitPriceSpecification ;
+            gr:hasCurrency "USD"^^xsd:string ;
+            gr:hasCurrencyValue "55000.0"^^xsd:float ;
+            gr:priceType "BASE"^^xsd:string ] ;
+    time:hasTime [ a time:Instant ;
+            time:inXSDDateTimeStamp "2024-02-04T00:00:00"^^xsd:dateTime ] .
