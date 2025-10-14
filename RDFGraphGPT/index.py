@@ -90,6 +90,20 @@ def graph_from_file():
         
     return render_template('from_file.html', files=files)
 
+@app.route("/ovs_home", methods=["GET"])
+def ovs_home():
+    files = get_files_in_directory("results")
+    rdf_text = search_file(nombre_grafo)
+    
+    place = "SAME"
+    svg_url = url_for('static', filename='archivo.svg')
+    exception = gff(nombre_grafo)
+
+    if exception:
+        return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
+    else:
+        return render_template('ovs_home.html', graph=svg_url)
+
 @app.route("/ovs_new_instance", methods=["GET","POST"])
 def ovs_new_instance():
     if request.method == "POST":

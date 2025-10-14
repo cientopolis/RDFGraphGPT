@@ -266,9 +266,9 @@ def api_fetch_OVS(text):
     response = client.chat.completions.create(
     model="gpt-4-turbo",
     messages=[
-        {"role": "system", "content": "You are a helpful RDF turtle format expert. You know how to use clasess, properties and collections."},
-        {"role": "system", "content": "You help translating natural text into rdf turtle format graphs. The explanation of it is not needed."},
-        {"role": "system", "content": "I need you to use the inmontology.owl terms to build instances of a real estate listings graph."},
+        {"role": "system", "content": "You are an expert data engineer specializing in knowledge graphs. Your task is to convert unstructured text into a structured RDF graph using the Turtle (.ttl) syntax."},
+        {"role": "system", "content": "You have to answer only in RDF turtle format, without any extra information."},
+        {"role": "system", "content": "I need you to use the inmontology.owl terms to build instances of a real estate listings graph. Please use the IRI of the ontology (<http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>) as the base IRI."},
         {"role": "system", "content": "This is the ontology that you have to use:\n" + ontology_text},
         {"role": "user", "content": "Please translate this natural languaje real estate listing into RDF turtle format instance of the graph: "+text_example_OVS },
         {"role": "assistant", "content": rdf_example_OVS},
