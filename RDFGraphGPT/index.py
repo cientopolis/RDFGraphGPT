@@ -1,10 +1,14 @@
+from typing import List
 from flask import Flask, request, render_template, url_for
-from RDFGraphGPT import generate_graph, generate_graph_having_rdf, search_file, get_files_in_directory
+from RDFGraphGPT import generate_graph, generate_graph_having_rdf, search_file, get_files_in_directory, generate_ovs_graph
 from RDFGraphGPT import graph_from_file as gff
 import os
 
+from RDFGraphGPT.preguntas_ovs import PreguntaOVS
+
 app = Flask(__name__)
-app.debug = True
+app.config["DEBUG"] = True
+nombre_grafo = "grafo_la_plata_mini"
 
 @app.route("/", methods=["GET", "POST"])
 def graph():
@@ -12,16 +16,16 @@ def graph():
         # Obtiene los datos del formulario
         form_data = request.form
         text = form_data.get('text')
-        api_key = form_data.get('api-key')
         place = "DIFFERENT"
         file_name = form_data.get('file-name')
         svg_url = url_for('static', filename='archivo.svg')
         
-        exception = generate_graph(text, api_key,place, file_name)
+        exception = generate_graph(text, place, file_name)
         
         if exception:
             rdf_text = search_file(file_name)
-            return render_template('edit.html', rdf_text=rdf_text, error=exception)
+            files = get_files_in_directory("results")
+            return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
         else:
             return render_template('graph.html', graph=svg_url)
         
@@ -40,7 +44,8 @@ def save():
     exception = generate_graph_having_rdf(rdf_text, place, file_name)
         
     if exception:
-        return render_template('edit.html', rdf_text=rdf_text, error=exception)
+        files = get_files_in_directory("results")
+        return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
     else:
         return render_template('graph.html', graph=svg_url)
 
@@ -52,16 +57,15 @@ def graph_existent():
         # Obtiene los datos del formulario
         form_data = request.form
         text = form_data.get('text')
-        api_key = form_data.get('api-key')
         place = "SAME"
         file_name = form_data.get('file-name')
         svg_url = url_for('static', filename='archivo.svg')
         
-        exception = generate_graph(text, api_key,place, file_name)
+        exception = generate_graph(text, place, file_name)
         
         if exception:
             rdf_text = search_file(file_name)
-            return render_template('edit.html', rdf_text=rdf_text, error=exception)
+            return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
         else:
             return render_template('graph.html', graph=svg_url)
     
@@ -80,13 +84,65 @@ def graph_from_file():
         exception = gff(file_name)
         
         if exception:
-            return render_template('edit.html', rdf_text=rdf_text, error=exception)
+            return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
         else:
             return render_template('from_file.html', files=files,graph=svg_url)
         
     return render_template('from_file.html', files=files)
 
-if __name__ == "__name__":
-    app.run()
+@app.route("/ovs_new_instance", methods=["GET","POST"])
+def ovs_new_instance():
+    if request.method == "POST":
+        form_data = request.form
+        text = form_data.get('text')
+        place = "SAME" #Aca va a ser siempre SAME
+        # file_name = form_data.get('file-name') #Poner aca nombre del archivo del grafo
+        file_name = nombre_grafo
+        svg_url = url_for('static', filename='archivo.svg')
+        
+        exception = generate_ovs_graph(text, place, file_name)
+        
+        if exception:
+            rdf_text = search_file(file_name)
+            files = get_files_in_directory("results")
+            return render_template('edit.html', rdf_text=rdf_text, error=exception, files=files)
+        else:
+            return render_template('graph.html', graph=svg_url)
+        
+    return render_template('ovs_new_instance.html', nombre_grafo=nombre_grafo)
+
+@app.route("/questions", methods=["GET", "POST"])
+def questions():
+    if request.method == "POST":
+        # Handle the form submission
+        pass
+    
+    p1 = PreguntaOVS(
+        id="001",
+        pregunta="¿Cuál es el precio del local?",
+        query="SELECT ?precio WHERE { ... }",
+        respuesta="El precio del local es de $1000.",
+        grafo="io:listing_site2_A1405300735 ..."
+    )
+
+    p2 = PreguntaOVS(
+        id="002",
+        pregunta="¿Dónde está ubicado el local?",
+        query="SELECT ?direccion WHERE { ... }",
+        respuesta="El local está ubicado en la calle Falsa 123.",
+        grafo="io:feature_address_real_estate_site2_A1405300735 ..."
+    )
+        
+    p3 = PreguntaOVS(
+        id="003",
+        pregunta="¿Cuáles son las características del local?",
+        query="SELECT ?caracteristicas WHERE { ... }",
+        respuesta="El local tiene 3 habitaciones y 2 baños.",
+        grafo="io:feature_caracteristicas_real_estate_site2_A1405300735 ..."
+    )
+
+    preguntas: List[PreguntaOVS] = [p1, p2, p3]
+    return render_template('questions.html', preguntas=preguntas)
+
 
 #poetry run flask --app index run

@@ -1,0 +1,57 @@
+{% extends 'basic.html' %}
+{% block title %}Preguntas{% endblock %}
+
+{% block content %}
+    <h2 class="fw-light">Preguntas para el grafo de OVS</h2>
+    <p class="fst-italic">Podés seleccionar una pregunta y ver el codigo SPARQL que la traslada al grafo. Además, al ejecutar la query verás la respuesta en lenguaje natural a la pregunta y el grafico correspondiente.</p>
+    <div class="container d-flex flex-column vh-100">
+        <div class="row align-items-center">
+            <div class="col-4">
+                <h5>Preguntas OVS</h5>
+            </div>
+            <div class="col-8">
+                <h5>Pregunta seleccionada</h5>
+            </div>
+        </div>
+        <div class="row align-items-start">
+            <div class="col-4">
+                <div class="d-grid gap-3" role="group" aria-label="Vertical radio toggle button group">
+                    {% for pregunta in preguntas %}
+                        <input type="radio" class="btn-check" name="vbtn-radio" id="vbtn-radio-{{ pregunta.id }}" 
+                        autocomplete="off" 
+                        {% if loop.first %}checked{% endif %} 
+                        onclick="updateSelectedQuestion('{{ pregunta.pregunta }}', '{{ pregunta.query }}', '{{ pregunta.respuesta }}')">
+                        <label class="btn btn-outline w-100 boton-basico" for="vbtn-radio-{{ pregunta.id }}">{{ pregunta.pregunta }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-8">
+                <div class="card" style="border-color: #376889ff;">
+                    <div class="card-body">
+                        <h5 class="card-title" id="titulo-pregunta">{{preguntas[0].pregunta}}</h5>
+                        <p class="card-text" id="query-pregunta">{{preguntas[0].query}}</p>
+                        <div class="mt-auto d-flex justify-content-end">
+                            <button class="btn boton-basico" onclick="updateResponse()">Ejecutar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row flex-grow-1 mt-3">
+            <div class="col-4">
+                <div class="card h-50" style="border-color: #376889ff;">
+                    <div class="card-body">
+                        <h5 class="card-title">Respuesta</h5>
+                        <p class="card-text" id="respuesta-pregunta">{{preguntas[0].respuesta}}</p>
+                        <div class="mt-auto d-flex justify-content-end">
+                            <button class="btn boton-basico" onclick="showGraph()">Ver en el grafo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-8">
+            </div>
+        </div>
+    </div>
+    <script src="../static/js/scripts.js"></script>
+{% endblock %}

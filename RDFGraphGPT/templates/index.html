@@ -12,7 +12,9 @@
         {% block form_action %}
         <form action="/" method="post">
         {% endblock %}
+        {% block msj_guardado%}
         <label for="place" class="fw-normal">Dónde queres guardar tu rdf?</label>
+        {% endblock %}
     {% block guardado %}
         <div>
             <div class="input-group mb-3">
@@ -26,14 +28,15 @@
             <textarea name="text" id="text" rows="10" class="form-control" aria-label="With textarea"></textarea>
         </div>
         <label for="api-key" class="form-label"></label>
-        <!--<div class="input-group">
-            <span class="input-group-text" id="basic-addon3">OpenAI API key:</span>
-            <input type="text" name="api-key" class="form-control" id="api-key" aria-describedby="basic-addon3 basic-addon4">
-        </div> -->
-        <br/>   
+        <br/>
         <div class="d-grid gap-2">
-          <button class="btn btn-light" type="submit" style="background-color:#7FB3D5; ">Generar grafo</button>
+          <button class="btn btn-light boton-basico" type="submit" id="btn">Generar grafo</button>
+          <button class="btn btn-light" type="button" style="display:none; background-color:#7FB3D5; " id="btnCargando" disabled>
+            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <span role="status">Cargando...</span>
+          </button>
         </div>
       </form>
     </div>
+    <script src="../static/js/scripts.js"></script>
 {% endblock %}

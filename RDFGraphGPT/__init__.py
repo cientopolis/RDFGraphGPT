@@ -1,4 +1,6 @@
+from typing import List
 from openai import OpenAI
+from RDFGraphGPT.preguntas_ovs import PreguntaOVS
 import rdflib
 import pygraphviz as pgv
 import os
@@ -58,6 +60,48 @@ dbo:birthDate rdf:type rdf:Property .
 dbo:birthPlace rdf:type rdf:Property
 
 """
+
+text_example_OVS = """
+Local Mar Del Plata Vendo O Permuto Por Auto U$s 19.000
+Se vende local comercial en Mar del Plata, ubicado en Luro e Independencia 3212, zona Centro.
+El precio es de USD 19.000, con una base de USD 17.500.
+Propietario vende o permuta por auto.
+"""
+rdf_example_OVS = """
+io:listing_site2_A1405300735 a pronto:RealEstateListing ;
+rdfs:label "Local Mar Del Plata Vendo O Permuto Por Auto U$s 19.000"^^xsd:string ;
+dc:date "2024-01-29T00:00:00"^^xsd:dateTime ;
+gr:hasBusinessFunction gr:Sell ;
+sioc:about io:real_estate_site2_A1405300735 ;
+sioc:has_creator io:account_site2_97219375 ;
+sioc:has_space pronto:site2 ;
+sioc:id "A1405300735"^^xsd:string ;
+sioc:read_at "2024-02-02T00:00:00"^^xsd:dateTime ;
+io:hasFeature [ a io:Precio ;
+    io:hasDetail [ a io:TemporalFeature ;
+    io:hasScraperTime [ a time:Instant ;
+        time:inXSDDateTimeStamp "2024-02-02T00:00:00"^^xsd:dateTime ] ;
+    io:hasScraperValue [ a gr:UnitPriceSpecification ;
+        gr:hasCurrency "USD"^^xsd:string ;
+        gr:hasCurrencyValue "17500.0"^^xsd:float ;
+        gr:priceType "BASE"^^xsd:string ] ] ] .
+
+io:real_estate_site2_A1405300735 a io:Local ;
+io:hasFeature io:feature_address_real_estate_site2_A1405300735 ;
+rec:includes io:space_building_site2_A1405300735,
+io:space_land_site2_A1405300735 .
+
+io:feature_address_real_estate_site2_A1405300735 a io:Direccion ;
+io:hasDetail [ a io:TemporalFeature ;
+    io:hasScraperTime [ a time:Instant ;
+        time:inXSDDateTimeStamp "2024-02-02T00:00:00"^^xsd:dateTime ] ;
+    io:hasScraperValue [ a io:PostalAddress ;
+        io:address "luro e independencia 3212"^^xsd:string ;
+        io:city io:district_Mar%20del%20Plata_Bs.As.%20Costa%20Atlántica ;
+        io:neighborhood io:neiborhood_province_Bs.As.%2520Costa%2520Atlática_district_Mar%2520del%2520Plata_Bs.As.%2520Costa%2520Atlántica_Centro ;
+    io:province io:province_Bs.As.%20Costa%20Atlántica ] ] .
+"""
+
 #funcion para pasar a dot
 def rdf_to_dot(rdf_file, dot_file):
     # Crear un nuevo grafo RDF    
@@ -96,7 +140,7 @@ def rdf_to_dot(rdf_file, dot_file):
     # except Exception as e:
     #     print(f"Error visualizing the graph: {e}")
         
-def generate_graph(text, api_key, place, file_name):
+def generate_graph(text, place, file_name):
     filename = file_name + ".ttl"
 
     # Define the directory and file path
@@ -128,12 +172,42 @@ def generate_graph(text, api_key, place, file_name):
     else:
         svg_file = os.path.join(STATIC_DIR, 'archivo.svg')
         subprocess.run(['dot', '-Tsvg', dot_file, '-o', svg_file])
+        
+
+def generate_ovs_graph(text, place, file_name):
+    filename = file_name + ".ttl"
+    # Define the directory and file path
+    directory = "results"
+    # file_name = "output.ttl"
+    file_path = os.path.join(directory, filename)
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        
+    response = api_fetch_OVS(text)
+    
+    # Write to the file 
+    if(place == "DIFFERENT"):
+        with open(file_path, "w") as file:
+            file.write(response.choices[0].message.content)
+    else:
+        with open(file_path, "a") as file:
+            file.write(response.choices[0].message.content)
+
+    rdf_file = 'results/' + filename
+    dot_file = 'results/archivo.dot'
+
+    exception = rdf_to_dot(rdf_file, dot_file)
+    
+    if exception:
+        return exception
+    else:
+        svg_file = os.path.join(STATIC_DIR, 'archivo.svg')
+        subprocess.run(['dot', '-Tsvg', dot_file, '-o', svg_file])
 
 def generate_graph_having_rdf(rdf_text, place, file_name):
-    if (place == "DIFFERENT"):
-        filename = file_name + ".ttl"
-    else:
-        filename = file_name + ".ttl" #Aca despues tengo que agregar el select de los que ya existen
+    filename = file_name + ".ttl"
 
     # Define the directory and file path
     directory = "results"
@@ -185,6 +259,24 @@ def api_fetch(text):
     return response
     # +" Please just translate the text, don't add any extra information; and when the response ends, put the string eof."
     
+def api_fetch_OVS(text):
+    with open("static/inmontology.owl", "r", encoding="utf-8") as f:
+        ontology_text = f.read()
+        
+    response = client.chat.completions.create(
+    model="gpt-4-turbo",
+    messages=[
+        {"role": "system", "content": "You are a helpful RDF turtle format expert. You know how to use clasess, properties and collections."},
+        {"role": "system", "content": "You help translating natural text into rdf turtle format graphs. The explanation of it is not needed."},
+        {"role": "system", "content": "I need you to use the inmontology.owl terms to build instances of a real estate listings graph."},
+        {"role": "system", "content": "This is the ontology that you have to use:\n" + ontology_text},
+        {"role": "user", "content": "Please translate this natural languaje real estate listing into RDF turtle format instance of the graph: "+text_example_OVS },
+        {"role": "assistant", "content": rdf_example_OVS},
+        {"role": "user", "content": "Please translate this natural languaje real estate listing into RDF turtle format instance of the graph: "+text }
+    ]
+    )
+    return response
+
 def search_file(file_name):
     directory = "results"
     file_path = os.path.join(directory, file_name + ".ttl")
